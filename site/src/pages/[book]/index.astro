@@ -14,10 +14,13 @@ export function getStaticPaths() {
 
 const { book } = Astro.props;
 
-// Check if book header image exists
+// Check if book header image exists (v1 and v2)
 const imagePath = `images/books/${book.id}.png`;
+const imagePathV2 = `images/books/${book.id}-v2.png`;
 const fullImagePath = path.join(process.cwd(), 'public', imagePath);
+const fullImagePathV2 = path.join(process.cwd(), 'public', imagePathV2);
 const hasHeaderImage = fs.existsSync(fullImagePath);
+const hasV2Image = fs.existsSync(fullImagePathV2);
 
 // Check which chapters have illustrations
 function hasChapterImage(chapterNum: number): boolean {
@@ -36,10 +39,21 @@ function hasChapterImage(chapterNum: number): boolean {
 
   {hasHeaderImage ? (
     <div class="hero">
-      <img src={`${import.meta.env.BASE_URL}${imagePath}`} alt={book.name} class="hero-image" />
+      <img
+        src={`${import.meta.env.BASE_URL}${imagePath}`}
+        alt={book.name}
+        class="hero-image"
+        data-v1={`${import.meta.env.BASE_URL}${imagePath}`}
+        data-v2={hasV2Image ? `${import.meta.env.BASE_URL}${imagePathV2}` : ''}
+      />
       <div class="hero-overlay">
         <h1>{book.name}</h1>
       </div>
+      {hasV2Image && (
+        <button class="version-toggle" aria-label="Switch image version">
+          <span class="version-label">v1</span>
+        </button>
+      )}
     </div>
   ) : (
     <h1>{book.name}</h1>
@@ -106,4 +120,65 @@ function hasChapterImage(chapterNum: number): boolean {
     margin-bottom: 0.5rem;
     font-weight: normal;
   }
+
+  .version-toggle {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    padding: 0.25rem 0.5rem;
+    cursor: pointer;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: background 0.2s;
+  }
+
+  .version-toggle:hover {
+    background: rgba(0, 0, 0, 0.8);
+  }
+
+  .version-label {
+    pointer-events: none;
+  }
 </style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.querySelector('.version-toggle');
+    if (!toggle) return;
+
+    const img = document.querySelector('.hero-image');
+    const label = toggle.querySelector('.version-label');
+    const v1Src = img.dataset.v1;
+    const v2Src = img.dataset.v2;
+
+    if (!v2Src) return;
+
+    // Check localStorage for preference
+    const pageKey = window.location.pathname;
+    const stored = localStorage.getItem(`img-version-${pageKey}`);
+    let currentVersion = stored === 'v2' ? 'v2' : 'v1';
+
+    // Apply stored preference
+    if (currentVersion === 'v2') {
+      img.src = v2Src;
+      label.textContent = 'v2';
+    }
+
+    toggle.addEventListener('click', () => {
+      if (currentVersion === 'v1') {
+        img.src = v2Src;
+        label.textContent = 'v2';
+        currentVersion = 'v2';
+      } else {
+        img.src = v1Src;
+        label.textContent = 'v1';
+        currentVersion = 'v1';
+      }
+      localStorage.setItem(`img-version-${pageKey}`, currentVersion);
+    });
+  });
+</script>

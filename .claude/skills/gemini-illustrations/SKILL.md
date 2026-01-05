@@ -72,15 +72,22 @@ Environment variables:
 - `PROMPT` - The image generation prompt (required if not using default)
 - `OUTPUT` - Output file path (default: `site/public/header.png`)
 - `ASPECT` - Aspect ratio: "1:1", "3:4", "4:3", "9:16", "16:9" (default: "16:9")
-- `MODEL` - Model to use (default: `imagen-4.0-generate-001`)
+- `MODEL` - Model to use (default: `gemini-3-pro-image-preview`)
 
-### Available Models
+### Required Model
 
-| Model | Quality | Faces | Notes |
-|-------|---------|-------|-------|
-| `gemini-3-pro-image-preview` | Excellent | Best | Recommended for figures |
-| `imagen-4.0-generate-001` | Good | OK | Default, 70/day limit |
-| `imagen-4.0-ultra-generate-001` | Higher | OK | 2K resolution, 2x cost |
+**CRITICAL: Always use `gemini-3-pro-image-preview` for all image generation.**
+
+```bash
+MODEL="gemini-3-pro-image-preview" PROMPT="..." OUTPUT="..." node lib/generate-image.js
+```
+
+**DO NOT switch to alternative models** (imagen, gemini-flash, etc.) without explicit user permission. If quota is exhausted:
+1. STOP generating images immediately
+2. Report the quota error to the user
+3. Wait for user instructions - do NOT automatically switch models
+
+The style consistency of the project depends on using a single model throughout.
 
 ## Editing Existing Images
 

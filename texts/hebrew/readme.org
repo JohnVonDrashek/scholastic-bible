@@ -1,0 +1,3 @@
+This is a onversion of the Hebrew Masoretic Text text from [[https://ebible.org][E-Bible]] into Org format. The original files are at [[https://ebible.org/details.php?id=hbo][this site]]. File formats are kept the same as other files that have more books in the OT, so book order and numbers do not match the actual Hebrew Bible. This is so I may, in the future, write an Emacs script that helps navigate them more easily.
+
+Being a transcription of the MT, it is in the public domain.

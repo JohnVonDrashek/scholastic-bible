@@ -1,0 +1,26 @@
+{
+  "name": "scholastic-bible",
+  "version": "0.1.0",
+  "description": "CLI for looking up verses from Douay-Rheims, Latin Vulgate, Greek Septuagint, and Hebrew Masoretic texts",
+  "type": "module",
+  "bin": {
+    "bible": "./bin/bible.js"
+  },
+  "scripts": {
+    "test": "node bin/bible.js vulgate Genesis 1 1"
+  },
+  "keywords": [
+    "bible",
+    "douay-rheims",
+    "vulgate",
+    "septuagint",
+    "hebrew",
+    "masoretic",
+    "scripture"
+  ],
+  "author": "John VonDrashek",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^12.0.0"
+  }
+}

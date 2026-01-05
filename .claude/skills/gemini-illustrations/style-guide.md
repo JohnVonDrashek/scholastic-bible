@@ -90,11 +90,17 @@ The visual style draws from three primary influences:
 ### Figure Representation
 
 **Sacred Figures**
-- Gold halos (circular for saints, cruciform for Christ)
 - Elongated proportions
 - Frontal or three-quarter poses
 - Stylized, iconic faces
 - Hierarchical scaling (important figures larger)
+
+**Halos (CRITICAL - read carefully)**
+- **Plain circular gold halo**: Used for ALL saints, apostles, prophets, angels, and holy figures
+- **Cruciform halo (cross within nimbus)**: Reserved EXCLUSIVELY for Christ and ONLY Christ
+- When prompting, explicitly specify "plain circular gold halo" for non-Christ figures
+- NEVER request "golden halo" alone for saints - always say "plain circular golden halo, not cruciform"
+- The cruciform halo is a theological statement of divinity; using it for saints is iconographically incorrect
 
 **Clothing**
 - Flowing Byzantine-style robes
@@ -227,6 +233,11 @@ No modern elements, no text overlays.
 
 ## Things to Avoid
 
+- **CRUCIFORM HALOS ON NON-CHRIST FIGURES**: This is theologically incorrect
+  - Only Christ may have a cruciform (cross-bearing) halo
+  - Saints, apostles, prophets, angels get plain circular halos
+  - Always explicitly specify "plain circular gold halo" in prompts for holy figures
+  - If depicting Christ, explicitly request "cruciform halo with cross"
 - **ANY TEXT OR LETTERING**: Imagen cannot reliably spell. Never request:
   - Labels or names on figures
   - Banners or scrolls with writing

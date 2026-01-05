@@ -19,7 +19,7 @@ const base = import.meta.env.BASE_URL;
 <div class="chapter-grid">
   {chapters.map((ch) => (
     <a
-      href={`${base}${bookId}/${ch.number}`}
+      href={`${base}${bookId}/${ch.number}/`}
       class:list={["chapter-link", { "has-edits": ch.editCount > 0, "has-illustration": ch.hasIllustration }]}
       title={ch.hasIllustration ? 'Illustrated' : (ch.editCount > 0 ? `${ch.editCount} edits, ${ch.footnoteCount} notes` : '')}
     >

@@ -22,7 +22,7 @@ const base = import.meta.env.BASE_URL;
   <ul class="book-list">
     {books.map((book) => (
       <li>
-        <a href={`${base}${book.id}`}>{book.name}</a>
+        <a href={`${base}${book.id}/`}>{book.name}</a>
         <span class="book-meta">
           <span class="chapter-count">{book.chapters} ch.</span>
           {book.illustrationCount > 0 && (

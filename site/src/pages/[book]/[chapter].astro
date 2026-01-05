@@ -41,11 +41,11 @@ const hasHeaderImage = fs.existsSync(fullImagePath);
 
 // Navigation links
 const prevLink = chapterNum > 1
-  ? { href: `${base}${book.id}/${chapterNum - 1}`, label: `Chapter ${chapterNum - 1}` }
+  ? { href: `${base}${book.id}/${chapterNum - 1}/`, label: `Chapter ${chapterNum - 1}` }
   : undefined;
 
 const nextLink = chapterNum < totalChapters
-  ? { href: `${base}${book.id}/${chapterNum + 1}`, label: `Chapter ${chapterNum + 1}` }
+  ? { href: `${base}${book.id}/${chapterNum + 1}/`, label: `Chapter ${chapterNum + 1}` }
   : undefined;
 ---
 
@@ -53,7 +53,7 @@ const nextLink = chapterNum < totalChapters
   <Fragment slot="breadcrumb">
     <span class="breadcrumb">
       <span>/</span>
-      <a href={`${base}${book.id}`}>{book.name}</a>
+      <a href={`${base}${book.id}/`}>{book.name}</a>
       <span>/</span>
       <span>Chapter {chapterNum}</span>
     </span>

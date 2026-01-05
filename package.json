@@ -9,6 +9,7 @@
   "scripts": {
     "test": "node bin/bible.js vulgate Genesis 1 1",
     "generate": "node lib/generator.js",
+    "generate:image": "node lib/generate-image.js",
     "site:install": "cd site && npm install",
     "site:dev": "cd site && npm run dev",
     "site:build": "cd site && npm run build",
@@ -26,6 +27,8 @@
   "author": "John VonDrashek",
   "license": "MIT",
   "dependencies": {
-    "commander": "^12.0.0"
+    "@google/genai": "^1.34.0",
+    "commander": "^12.0.0",
+    "dotenv": "^17.2.3"
   }
 }

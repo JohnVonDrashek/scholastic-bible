@@ -3,6 +3,9 @@ interface Book {
   id: string;
   name: string;
   chapters: number;
+  editCount: number;
+  footnoteCount: number;
+  illustrationCount?: number;
 }
 
 interface Props {
@@ -20,7 +23,18 @@ const base = import.meta.env.BASE_URL;
     {books.map((book) => (
       <li>
         <a href={`${base}${book.id}`}>{book.name}</a>
-        <span class="chapter-count">{book.chapters} ch.</span>
+        <span class="book-meta">
+          <span class="chapter-count">{book.chapters} ch.</span>
+          {book.illustrationCount > 0 && (
+            <span class="illustration-count" title="Illustrations">{book.illustrationCount} ill.</span>
+          )}
+          {book.editCount > 0 && (
+            <span class="edit-count" title="Edited verses">{book.editCount} edits</span>
+          )}
+          {book.footnoteCount > 0 && (
+            <span class="footnote-count" title="Commentary notes">{book.footnoteCount} notes</span>
+          )}
+        </span>
       </li>
     ))}
   </ul>
@@ -55,9 +69,42 @@ const base = import.meta.env.BASE_URL;
     color: var(--color-accent);
   }
 
+  .book-meta {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
   .chapter-count {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--color-muted);
+    font-family: var(--font-sans);
+  }
+
+  .edit-count {
+    font-size: 0.7rem;
+    color: white;
+    background: var(--color-accent);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-family: var(--font-sans);
+  }
+
+  .footnote-count {
+    font-size: 0.7rem;
+    color: var(--color-accent);
+    background: var(--color-patched);
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
+    font-family: var(--font-sans);
+  }
+
+  .illustration-count {
+    font-size: 0.7rem;
+    color: white;
+    background: #6B4423;
+    padding: 0.1rem 0.4rem;
+    border-radius: 3px;
     font-family: var(--font-sans);
   }
 </style>

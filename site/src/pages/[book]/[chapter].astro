@@ -2,7 +2,10 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Verse from '../../components/Verse.astro';
 import Navigation from '../../components/Navigation.astro';
+import Narration from '../../components/Narration.astro';
 import bible from '../../data/bible.json';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export function getStaticPaths() {
   const paths = [];
@@ -31,6 +34,11 @@ const chapterNum = chapterIndex + 1;
 const totalChapters = book.chapters.length;
 const base = import.meta.env.BASE_URL;
 
+// Check if chapter header image exists
+const imagePath = `images/chapters/${book.id}-${chapterNum}.png`;
+const fullImagePath = path.join(process.cwd(), 'public', imagePath);
+const hasHeaderImage = fs.existsSync(fullImagePath);
+
 // Navigation links
 const prevLink = chapterNum > 1
   ? { href: `${base}${book.id}/${chapterNum - 1}`, label: `Chapter ${chapterNum - 1}` }
@@ -51,7 +59,22 @@ const nextLink = chapterNum < totalChapters
     </span>
   </Fragment>
 
-  <h1>{book.name} {chapterNum}</h1>
+  {hasHeaderImage ? (
+    <div class="hero">
+      <img src={`${base}${imagePath}`} alt={`${book.name} ${chapterNum}`} class="hero-image" />
+      <div class="hero-overlay">
+        <h1>{book.name} {chapterNum}</h1>
+      </div>
+    </div>
+  ) : (
+    <h1>{book.name} {chapterNum}</h1>
+  )}
+
+  {chapterData.summary && (
+    <p class="chapter-summary">{chapterData.summary}</p>
+  )}
+
+  <Narration />
 
   <div class="verses">
     {chapterData.verses.map((verse) => (
@@ -68,6 +91,43 @@ const nextLink = chapterNum < totalChapters
 </BaseLayout>
 
 <style>
+  .hero {
+    position: relative;
+    margin: 0 auto 2rem auto;
+    max-width: 800px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .hero-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem 1.5rem 1.5rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  }
+
+  .hero-overlay h1 {
+    color: white;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .chapter-summary {
+    font-style: italic;
+    color: var(--color-muted);
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
   .verses {
     margin-top: 1.5rem;
   }

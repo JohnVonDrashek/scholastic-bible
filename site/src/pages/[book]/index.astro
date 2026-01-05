@@ -2,6 +2,8 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ChapterList from '../../components/ChapterList.astro';
 import bible from '../../data/bible.json';
+import fs from 'node:fs';
+import path from 'node:path';
 
 export function getStaticPaths() {
   return bible.books.map(book => ({
@@ -11,6 +13,17 @@ export function getStaticPaths() {
 }
 
 const { book } = Astro.props;
+
+// Check if book header image exists
+const imagePath = `images/books/${book.id}.png`;
+const fullImagePath = path.join(process.cwd(), 'public', imagePath);
+const hasHeaderImage = fs.existsSync(fullImagePath);
+
+// Check which chapters have illustrations
+function hasChapterImage(chapterNum: number): boolean {
+  const chapterImagePath = path.join(process.cwd(), 'public', 'images', 'chapters', `${book.id}-${chapterNum}.png`);
+  return fs.existsSync(chapterImagePath);
+}
 ---
 
 <BaseLayout title={book.name}>
@@ -21,19 +34,76 @@ const { book } = Astro.props;
     </span>
   </Fragment>
 
-  <h1>{book.name}</h1>
-  <p class="chapter-intro">Select a chapter to read:</p>
+  {hasHeaderImage ? (
+    <div class="hero">
+      <img src={`${import.meta.env.BASE_URL}${imagePath}`} alt={book.name} class="hero-image" />
+      <div class="hero-overlay">
+        <h1>{book.name}</h1>
+      </div>
+    </div>
+  ) : (
+    <h1>{book.name}</h1>
+  )}
+
+  {book.introduction && (
+    <div class="book-intro">
+      <p>{book.introduction}</p>
+    </div>
+  )}
+
+  <h2 class="chapter-heading">Chapters</h2>
 
   <ChapterList
     bookId={book.id}
     bookName={book.name}
-    chapterCount={book.chapters.length}
+    chapters={book.chapters.map(c => ({ number: c.number, editCount: c.editCount, footnoteCount: c.footnoteCount, hasIllustration: hasChapterImage(c.number) }))}
   />
 </BaseLayout>
 
 <style>
-  .chapter-intro {
+  .hero {
+    position: relative;
+    margin: 0 auto 2rem auto;
+    max-width: 800px;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .hero-image {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .hero-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 2rem 1.5rem 1.5rem;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  }
+
+  .hero-overlay h1 {
+    color: white;
+    margin: 0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .book-intro {
+    background: var(--color-patched);
+    border-left: 3px solid var(--color-accent);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    font-style: italic;
     color: var(--color-muted);
-    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+
+  .chapter-heading {
+    font-size: 1.25rem;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+    font-weight: normal;
   }
 </style>

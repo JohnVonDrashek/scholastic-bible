@@ -1,10 +1,12 @@
 import { defineConfig } from 'astro/config';
 
 export default defineConfig({
-  site: 'https://johnvondrashek.github.io',
+  site: 'https://vondrashek.com',
   base: '/scholastic-bible/',
   outDir: '../output',
   build: {
-    assets: 'assets'
-  }
+    assets: 'assets',
+    format: 'directory'
+  },
+  trailingSlash: 'always'
 });

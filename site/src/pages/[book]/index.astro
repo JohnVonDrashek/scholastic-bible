@@ -1,0 +1,39 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ChapterList from '../../components/ChapterList.astro';
+import bible from '../../data/bible.json';
+
+export function getStaticPaths() {
+  return bible.books.map(book => ({
+    params: { book: book.id },
+    props: { book }
+  }));
+}
+
+const { book } = Astro.props;
+---
+
+<BaseLayout title={book.name}>
+  <Fragment slot="breadcrumb">
+    <span class="breadcrumb">
+      <span>/</span>
+      <span>{book.name}</span>
+    </span>
+  </Fragment>
+
+  <h1>{book.name}</h1>
+  <p class="chapter-intro">Select a chapter to read:</p>
+
+  <ChapterList
+    bookId={book.id}
+    bookName={book.name}
+    chapterCount={book.chapters.length}
+  />
+</BaseLayout>
+
+<style>
+  .chapter-intro {
+    color: var(--color-muted);
+    margin-bottom: 1rem;
+  }
+</style>

@@ -1,0 +1,77 @@
+---
+interface Props {
+  number: number;
+  text: string;
+  patched?: boolean;
+  footnotes?: string[];
+}
+
+const { number, text, patched = false, footnotes = [] } = Astro.props;
+const hasFootnotes = footnotes.length > 0;
+---
+
+<div class:list={["verse", { patched }]} id={`v${number}`}>
+  <span class="verse-number">{number}</span>
+  <span class="verse-text">{text}</span>
+  {hasFootnotes && (
+    <sup class="footnote-marker" data-verse={number}>*</sup>
+  )}
+</div>
+
+{hasFootnotes && (
+  <div class="footnotes" id={`fn${number}`}>
+    {footnotes.map((note, i) => (
+      <p class="footnote">
+        <span class="footnote-ref">{number}.{i + 1}</span> {note}
+      </p>
+    ))}
+  </div>
+)}
+
+<style>
+  .verse {
+    margin-bottom: 0.25rem;
+  }
+
+  .verse.patched {
+    background: var(--color-patched);
+    padding: 0.25rem 0.5rem;
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+    border-radius: 3px;
+  }
+
+  .verse-number {
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    vertical-align: super;
+    margin-right: 0.25rem;
+  }
+
+  .verse-text {
+    /* inherits from body */
+  }
+
+  .footnote-marker {
+    color: var(--color-accent);
+    cursor: pointer;
+    margin-left: 0.125rem;
+  }
+
+  .footnotes {
+    margin: 0.5rem 0 1rem 1.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-border);
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+
+  .footnote {
+    margin-bottom: 0.5rem;
+  }
+
+  .footnote-ref {
+    font-weight: bold;
+    color: var(--color-accent);
+  }
+</style>

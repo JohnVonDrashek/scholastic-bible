@@ -1,0 +1,47 @@
+---
+interface Props {
+  prevLink?: { href: string; label: string };
+  nextLink?: { href: string; label: string };
+}
+
+const { prevLink, nextLink } = Astro.props;
+---
+
+<nav class="chapter-nav">
+  {prevLink ? (
+    <a href={prevLink.href} class="nav-prev">&larr; {prevLink.label}</a>
+  ) : (
+    <span class="nav-placeholder"></span>
+  )}
+
+  {nextLink ? (
+    <a href={nextLink.href} class="nav-next">{nextLink.label} &rarr;</a>
+  ) : (
+    <span class="nav-placeholder"></span>
+  )}
+</nav>
+
+<style>
+  .chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    margin: 2rem 0;
+    padding: 1rem 0;
+    border-top: 1px solid var(--color-border);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+  }
+
+  .chapter-nav a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .chapter-nav a:hover {
+    text-decoration: underline;
+  }
+
+  .nav-placeholder {
+    /* maintains spacing when only one link */
+  }
+</style>

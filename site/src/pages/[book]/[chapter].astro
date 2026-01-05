@@ -1,0 +1,73 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Verse from '../../components/Verse.astro';
+import Navigation from '../../components/Navigation.astro';
+import bible from '../../data/bible.json';
+
+export function getStaticPaths() {
+  const paths = [];
+
+  for (const book of bible.books) {
+    for (let i = 0; i < book.chapters.length; i++) {
+      paths.push({
+        params: {
+          book: book.id,
+          chapter: String(i + 1)
+        },
+        props: {
+          book,
+          chapterIndex: i,
+          chapterData: book.chapters[i]
+        }
+      });
+    }
+  }
+
+  return paths;
+}
+
+const { book, chapterIndex, chapterData } = Astro.props;
+const chapterNum = chapterIndex + 1;
+const totalChapters = book.chapters.length;
+
+// Navigation links
+const prevLink = chapterNum > 1
+  ? { href: `/${book.id}/${chapterNum - 1}`, label: `Chapter ${chapterNum - 1}` }
+  : undefined;
+
+const nextLink = chapterNum < totalChapters
+  ? { href: `/${book.id}/${chapterNum + 1}`, label: `Chapter ${chapterNum + 1}` }
+  : undefined;
+---
+
+<BaseLayout title={`${book.name} ${chapterNum}`}>
+  <Fragment slot="breadcrumb">
+    <span class="breadcrumb">
+      <span>/</span>
+      <a href={`/${book.id}`}>{book.name}</a>
+      <span>/</span>
+      <span>Chapter {chapterNum}</span>
+    </span>
+  </Fragment>
+
+  <h1>{book.name} {chapterNum}</h1>
+
+  <div class="verses">
+    {chapterData.verses.map((verse) => (
+      <Verse
+        number={verse.number}
+        text={verse.text}
+        patched={verse.patched}
+        footnotes={verse.footnotes}
+      />
+    ))}
+  </div>
+
+  <Navigation prevLink={prevLink} nextLink={nextLink} />
+</BaseLayout>
+
+<style>
+  .verses {
+    margin-top: 1.5rem;
+  }
+</style>

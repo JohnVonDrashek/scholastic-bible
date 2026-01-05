@@ -1,0 +1,130 @@
+---
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Scholastic Bible - A study-oriented translation with scholastic commentary" />
+    <title>{title} | Scholastic Bible</title>
+    <style>
+      :root {
+        --color-bg: #faf9f7;
+        --color-text: #2c2c2c;
+        --color-muted: #666;
+        --color-accent: #8b4513;
+        --color-patched: #fff8e7;
+        --color-border: #e0d8cf;
+        --font-serif: Georgia, 'Times New Roman', serif;
+        --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --max-width: 720px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-serif);
+        font-size: 18px;
+        line-height: 1.7;
+        color: var(--color-text);
+        background: var(--color-bg);
+      }
+
+      header {
+        border-bottom: 1px solid var(--color-border);
+        padding: 1rem;
+        background: white;
+      }
+
+      header nav {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      header a {
+        color: var(--color-text);
+        text-decoration: none;
+      }
+
+      header a:hover {
+        color: var(--color-accent);
+      }
+
+      header .site-title {
+        font-size: 1.25rem;
+        font-weight: normal;
+        font-variant: small-caps;
+        letter-spacing: 0.05em;
+      }
+
+      header .breadcrumb {
+        color: var(--color-muted);
+        font-size: 0.9rem;
+      }
+
+      header .breadcrumb span {
+        margin: 0 0.5rem;
+      }
+
+      main {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+
+      h1 {
+        font-size: 2rem;
+        font-weight: normal;
+        margin-bottom: 1.5rem;
+        color: var(--color-text);
+      }
+
+      h2 {
+        font-size: 1.5rem;
+        font-weight: normal;
+        margin: 2rem 0 1rem;
+        color: var(--color-text);
+      }
+
+      a {
+        color: var(--color-accent);
+      }
+
+      footer {
+        border-top: 1px solid var(--color-border);
+        padding: 2rem 1rem;
+        text-align: center;
+        color: var(--color-muted);
+        font-size: 0.875rem;
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <nav>
+        <a href="/" class="site-title">Scholastic Bible</a>
+        <slot name="breadcrumb" />
+      </nav>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>Ad maiorem Dei gloriam</p>
+    </footer>
+  </body>
+</html>

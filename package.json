@@ -7,7 +7,12 @@
     "bible": "./bin/bible.js"
   },
   "scripts": {
-    "test": "node bin/bible.js vulgate Genesis 1 1"
+    "test": "node bin/bible.js vulgate Genesis 1 1",
+    "generate": "node lib/generator.js",
+    "site:install": "cd site && npm install",
+    "site:dev": "cd site && npm run dev",
+    "site:build": "cd site && npm run build",
+    "build": "npm run generate && npm run site:build"
   },
   "keywords": [
     "bible",

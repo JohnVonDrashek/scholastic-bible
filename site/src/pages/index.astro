@@ -1,0 +1,43 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import BookList from '../components/BookList.astro';
+import bible from '../data/bible.json';
+
+const OT_BOOKS = [
+  'genesis', 'exodus', 'leviticus', 'numbers', 'deuteronomy',
+  'josue', 'judges', 'ruth', '1-samuel', '2-samuel',
+  '1-kings', '2-kings', '1-chronicles', '2-chronicles',
+  'ezra', 'nehemiah', 'tobias', 'judith', 'esther',
+  'job', 'psalms', 'proverbs', 'ecclesiastes', 'canticles',
+  'wisdom', 'ecclesiasticus', 'isaias', 'jeremias', 'lamentations',
+  'baruch', 'ezechiel', 'daniel', 'osee', 'joel', 'amos',
+  'abdias', 'jonas', 'micheas', 'nahum', 'habacuc', 'sophonias',
+  'aggeus', 'zacharias', 'malachias', '1-machabees', '2-machabees'
+];
+
+const otBooks = bible.books
+  .filter(b => OT_BOOKS.includes(b.id))
+  .map(b => ({ id: b.id, name: b.name, chapters: b.chapters.length }));
+
+const ntBooks = bible.books
+  .filter(b => !OT_BOOKS.includes(b.id))
+  .map(b => ({ id: b.id, name: b.name, chapters: b.chapters.length }));
+---
+
+<BaseLayout title="Home">
+  <h1>Scholastic Bible</h1>
+  <p class="intro">
+    A study-oriented translation based on the Douay-Rheims text with scholastic commentary and annotations.
+  </p>
+
+  <BookList title="Old Testament" books={otBooks} />
+  <BookList title="New Testament" books={ntBooks} />
+</BaseLayout>
+
+<style>
+  .intro {
+    font-style: italic;
+    color: var(--color-muted);
+    margin-bottom: 2rem;
+  }
+</style>

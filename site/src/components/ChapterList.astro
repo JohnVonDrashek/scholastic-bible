@@ -7,11 +7,12 @@ interface Props {
 
 const { bookId, bookName, chapterCount } = Astro.props;
 const chapters = Array.from({ length: chapterCount }, (_, i) => i + 1);
+const base = import.meta.env.BASE_URL;
 ---
 
 <div class="chapter-grid">
   {chapters.map((ch) => (
-    <a href={`/${bookId}/${ch}`} class="chapter-link">{ch}</a>
+    <a href={`${base}${bookId}/${ch}`} class="chapter-link">{ch}</a>
   ))}
 </div>
 

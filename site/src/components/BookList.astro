@@ -11,6 +11,7 @@ interface Props {
 }
 
 const { books, title } = Astro.props;
+const base = import.meta.env.BASE_URL;
 ---
 
 <section class="book-section">
@@ -18,7 +19,7 @@ const { books, title } = Astro.props;
   <ul class="book-list">
     {books.map((book) => (
       <li>
-        <a href={`/${book.id}`}>{book.name}</a>
+        <a href={`${base}${book.id}`}>{book.name}</a>
         <span class="chapter-count">{book.chapters} ch.</span>
       </li>
     ))}

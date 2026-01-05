@@ -1,6 +1,6 @@
 # Scholastic Bible
 
-![License](https://img.shields.io/badge/license-TBD-blue)
+![License](https://img.shields.io/badge/license-MIT-blue)
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
 ![Sources](https://img.shields.io/badge/sources-Douay--Rheims%20|%20Latin%20|%20Greek%20|%20Hebrew-informational)
 
@@ -108,7 +108,7 @@ scholastic-bible/
 
 ## License
 
-TBD
+MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 

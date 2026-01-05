@@ -58,10 +58,10 @@ Patches are JSON files in `patches/` keyed by verse reference:
 
 GitHub Pages auto-deploys on push to `main` via `.github/workflows/deploy.yml`.
 
-Live site: https://johnvondrashek.github.io/scholastic-bible/
+Live site: https://bible.vondrashek.com/
 
 ## Important Guidelines
 
 - **Do NOT create commits or push to remote without explicit user permission**
 - Book IDs use Douay-Rheims names (josue, tobias, isaias, machabees, etc.)
-- The site uses `/scholastic-bible/` as the base path for GitHub Pages
+- The site uses `/` as the base path (custom domain)

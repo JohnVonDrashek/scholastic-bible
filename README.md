@@ -81,29 +81,57 @@ bible translations    # List all translation aliases
 bible books           # List all available books
 ```
 
+## Live Site
+
+The Scholastic Bible is available online at **[bible.vondrashek.com](https://bible.vondrashek.com/)**
+
+## Site Development
+
+```bash
+npm run generate        # Generate bible.json from DR + patches
+npm run site:dev        # Run dev server (localhost:4321)
+npm run site:build      # Build static site
+npm run build           # Full pipeline (generate + build)
+```
+
+## Patch System
+
+Scholastic commentary is added via JSON patches in `patches/`. Each patch file contains verse-keyed footnotes:
+
+```json
+{
+  "Gen:1:26": {
+    "footnotes": [
+      "The plural 'Let us make' has been understood by the Fathers as an indication of the Trinity.",
+      "Cf. St. Augustine, De Trinitate I.7"
+    ]
+  }
+}
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on adding commentary.
+
 ## Project Structure
 
 ```
 scholastic-bible/
-├── README.md
-├── package.json
 ├── bin/
-│   └── bible.js         # CLI entry point
+│   └── bible.js           # CLI entry point
 ├── lib/
-│   ├── index.js         # Main lookup orchestrator
-│   ├── books.js         # Book name mappings
-│   └── parsers/         # Text parsers
-│       ├── douay-rheims.js
-│       ├── vulgate.js
-│       ├── septuagint.js
-│       └── hebrew.js
-├── texts/               # Source texts
-│   ├── douay-rheims/
-│   ├── vulgate/
-│   ├── septuagint/
-│   └── hebrew/
-├── commentary/          # Scholastic annotations and clarifications
-└── output/              # Generated study Bible with integrated commentary
+│   ├── index.js           # CLI lookup orchestrator
+│   ├── books.js           # Book name mappings
+│   ├── generator.js       # Parses DR + patches → bible.json
+│   ├── generate-image.js  # AI illustration generation
+│   └── parsers/           # Text parsers for each translation
+├── patches/               # JSON patches for scholastic footnotes
+├── texts/                 # Source Bible texts (DR, Vulgate, LXX, Hebrew)
+├── site/                  # Astro static site
+│   └── src/
+│       ├── pages/
+│       ├── components/
+│       ├── layouts/
+│       └── data/          # Generated bible.json
+└── output/                # Built static site (gitignored)
 ```
 
 ## License

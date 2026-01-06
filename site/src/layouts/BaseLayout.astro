@@ -132,13 +132,38 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
         text-transform: uppercase;
       }
 
-      header .breadcrumb {
-        color: var(--color-muted);
+      /* Breadcrumb - use :global because content comes from slots */
+      :global(.breadcrumb) {
+        display: flex;
+        align-items: center;
         font-size: 0.9rem;
+        font-family: var(--font-heading);
       }
 
-      header .breadcrumb span {
-        margin: 0 0.5rem;
+      :global(.breadcrumb span) {
+        color: var(--color-muted);
+      }
+
+      :global(.breadcrumb span:first-child),
+      :global(.breadcrumb span:nth-child(3)) {
+        margin: 0 0.4rem;
+        opacity: 0.5;
+      }
+
+      :global(.breadcrumb a),
+      :global(.breadcrumb a:link),
+      :global(.breadcrumb a:visited) {
+        color: var(--color-text);
+        text-decoration: none;
+        padding: 0.25rem 0.5rem;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+      }
+
+      :global(.breadcrumb a:hover) {
+        color: var(--color-accent);
+        background: color-mix(in srgb, var(--color-accent) 10%, transparent);
       }
 
       main {

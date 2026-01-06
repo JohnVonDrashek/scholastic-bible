@@ -1,10 +1,19 @@
 ---
+import { ViewTransitions } from 'astro:transitions';
+import { getBookPattern, getBookPatternDark, getDefaultPattern, getDefaultPatternDark } from '../lib/bookPatterns';
+import { getBookBackground, getBookColor } from '../lib/colorPalette';
+
 interface Props {
   title: string;
+  bookId?: string;
 }
 
-const { title } = Astro.props;
+const { title, bookId } = Astro.props;
 const base = import.meta.env.BASE_URL;
+const backgroundPattern = bookId ? getBookPattern(bookId) : getDefaultPattern();
+const backgroundPatternDark = bookId ? getBookPatternDark(bookId) : getDefaultPatternDark();
+const backgroundColor = bookId ? getBookBackground(bookId) : '#faf9f7';
+const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
 ---
 
 <!DOCTYPE html>
@@ -13,7 +22,30 @@ const base = import.meta.env.BASE_URL;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Scholastic Bible - A study-oriented translation with scholastic commentary" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cinzel+Decorative:wght@700&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
     <title>{title} | Scholastic Bible</title>
+    <ViewTransitions />
+    <script is:inline>
+      (function() {
+        function applyTheme() {
+          const stored = localStorage.getItem('theme');
+          const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+          if (stored === 'dark' || (!stored && prefersDark)) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+          }
+        }
+
+        // Apply on initial load
+        applyTheme();
+
+        // Re-apply after View Transitions swap the DOM
+        document.addEventListener('astro:after-swap', applyTheme);
+      })();
+    </script>
     <style>
       :root {
         --color-bg: #faf9f7;
@@ -22,9 +54,24 @@ const base = import.meta.env.BASE_URL;
         --color-accent: #8b4513;
         --color-patched: #fff8e7;
         --color-border: #e0d8cf;
-        --font-serif: Georgia, 'Times New Roman', serif;
+        --color-highlight: #fff3cd;
+        --color-illustration: #6B4423;
+        --font-serif: 'EB Garamond', Georgia, serif;
+        --font-heading: 'Cinzel', Georgia, serif;
         --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --font-drop-cap: 'Cinzel Decorative', serif;
         --max-width: 720px;
+      }
+
+      [data-theme="dark"] {
+        --color-bg: #1a1a1a;
+        --color-text: #e8e6e3;
+        --color-muted: #a0a0a0;
+        --color-accent: #c9a868;
+        --color-patched: #2a2520;
+        --color-border: #3a3530;
+        --color-highlight: #3d3520;
+        --color-illustration: #8b6b43;
       }
 
       * {
@@ -35,16 +82,29 @@ const base = import.meta.env.BASE_URL;
 
       body {
         font-family: var(--font-serif);
-        font-size: 18px;
-        line-height: 1.7;
+        font-size: 19px;
+        line-height: 1.75;
         color: var(--color-text);
+        background-color: var(--book-bg, var(--color-bg));
+        background-image: var(--book-pattern, none);
+        background-attachment: fixed;
+      }
+
+      .page {
+        max-width: 900px;
+        margin: 0 auto;
         background: var(--color-bg);
+        min-height: 100vh;
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+      }
+
+      [data-theme="dark"] .page {
+        box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
       }
 
       header {
         border-bottom: 1px solid var(--color-border);
         padding: 1rem;
-        background: white;
       }
 
       header nav {
@@ -65,10 +125,11 @@ const base = import.meta.env.BASE_URL;
       }
 
       header .site-title {
+        font-family: var(--font-heading);
         font-size: 1.25rem;
-        font-weight: normal;
-        font-variant: small-caps;
-        letter-spacing: 0.05em;
+        font-weight: 400;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
       }
 
       header .breadcrumb {
@@ -87,17 +148,21 @@ const base = import.meta.env.BASE_URL;
       }
 
       h1 {
+        font-family: var(--font-heading);
         font-size: 2rem;
-        font-weight: normal;
+        font-weight: 400;
         margin-bottom: 1.5rem;
         color: var(--color-text);
+        letter-spacing: 0.05em;
       }
 
       h2 {
+        font-family: var(--font-heading);
         font-size: 1.5rem;
-        font-weight: normal;
+        font-weight: 400;
         margin: 2rem 0 1rem;
         color: var(--color-text);
+        letter-spacing: 0.03em;
       }
 
       a {
@@ -112,20 +177,139 @@ const base = import.meta.env.BASE_URL;
         font-size: 0.875rem;
         font-style: italic;
       }
+
+      .theme-toggle {
+        margin-left: auto;
+        background: none;
+        border: 1px solid var(--color-border);
+        border-radius: 4px;
+        padding: 0.4rem 0.5rem;
+        cursor: pointer;
+        color: var(--color-muted);
+        font-size: 1rem;
+        line-height: 1;
+        transition: color 0.2s, border-color 0.2s;
+      }
+
+      .theme-toggle:hover {
+        color: var(--color-accent);
+        border-color: var(--color-accent);
+      }
+
+      .theme-toggle .icon-sun,
+      .theme-toggle .icon-moon {
+        display: none;
+      }
+
+      :root .theme-toggle .icon-moon {
+        display: inline;
+      }
+
+      [data-theme="dark"] .theme-toggle .icon-sun {
+        display: inline;
+      }
+
+      [data-theme="dark"] .theme-toggle .icon-moon {
+        display: none;
+      }
+
+      [data-theme="dark"] body {
+        background-color: #0d0d0d;
+        background-image: var(--book-pattern-dark, none);
+      }
+
+      /* View Transitions - gentle page turn effect */
+      @keyframes fade-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes fade-out {
+        from { opacity: 1; transform: translateY(0); }
+        to { opacity: 0; transform: translateY(-8px); }
+      }
+
+      /* Disable root transition - we'll animate only main content */
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation: none;
+      }
+
+      /* Animate only the main content area */
+      main {
+        view-transition-name: main-content;
+      }
+
+      ::view-transition-old(main-content) {
+        animation: fade-out 0.2s ease-out both;
+      }
+
+      ::view-transition-new(main-content) {
+        animation: fade-in 0.3s ease-out both;
+      }
     </style>
   </head>
-  <body>
-    <header>
-      <nav>
-        <a href={base} class="site-title">Scholastic Bible</a>
-        <slot name="breadcrumb" />
-      </nav>
-    </header>
-    <main>
-      <slot />
-    </main>
-    <footer>
-      <p>Ad maiorem Dei gloriam</p>
-    </footer>
+  <body style={`--book-pattern: ${backgroundPattern}; --book-pattern-dark: ${backgroundPatternDark}; --book-bg: ${backgroundColor}; --book-color: ${bookColor}`}>
+    <div class="page">
+      <header>
+        <nav>
+          <a href={base} class="site-title">Scholastic Bible</a>
+          <slot name="breadcrumb" />
+          <button class="theme-toggle" aria-label="Toggle dark mode">
+            <span class="icon-sun">☀️</span>
+            <span class="icon-moon">🌙</span>
+          </button>
+        </nav>
+      </header>
+      <main>
+        <slot />
+      </main>
+      <footer>
+        <p>Ad maiorem Dei gloriam</p>
+      </footer>
+    </div>
+    <script>
+      function setupThemeToggle() {
+        const toggle = document.querySelector('.theme-toggle');
+        if (!toggle) return;
+
+        function isDark() {
+          return document.documentElement.getAttribute('data-theme') === 'dark';
+        }
+
+        function setTheme(dark: boolean) {
+          if (dark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+          }
+        }
+
+        // Remove existing listener to prevent duplicates
+        const newToggle = toggle.cloneNode(true);
+        toggle.parentNode?.replaceChild(newToggle, toggle);
+
+        newToggle.addEventListener('click', () => {
+          setTheme(!isDark());
+        });
+      }
+
+      // Run on initial load and after each navigation
+      document.addEventListener('astro:page-load', setupThemeToggle);
+
+      // Listen for system preference changes (only if no manual preference)
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        const stored = localStorage.getItem('theme');
+        if (!stored) {
+          if (e.matches) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          } else {
+            document.documentElement.removeAttribute('data-theme');
+          }
+        }
+      });
+    </script>
   </body>
 </html>

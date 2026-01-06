@@ -4,15 +4,29 @@ interface Props {
   text: string;
   patched?: boolean;
   footnotes?: string[];
+  isFirst?: boolean;
 }
 
-const { number, text, patched = false, footnotes = [] } = Astro.props;
+const { number, text, patched = false, footnotes = [], isFirst = false } = Astro.props;
 const hasFootnotes = footnotes.length > 0;
+
+// For drop cap: extract first letter and rest of text
+const firstLetter = isFirst ? text.charAt(0) : '';
+const restOfText = isFirst ? text.slice(1) : text;
 ---
 
-<div class:list={["verse", { patched }]} id={`v${number}`}>
-  <span class="verse-number">{number}</span>
-  <span class="verse-text">{text}</span>
+<div class:list={["verse", { patched, "verse-first": isFirst }]} id={`v${number}`}>
+  {isFirst ? (
+    <>
+      <span class="drop-cap">{firstLetter}</span>
+      <span class="verse-text">{restOfText}</span>
+    </>
+  ) : (
+    <>
+      <span class="verse-number">{number}</span>
+      <span class="verse-text">{text}</span>
+    </>
+  )}
   {hasFootnotes && (
     <sup class="footnote-marker" data-verse={number}>*</sup>
   )}
@@ -41,9 +55,28 @@ const hasFootnotes = footnotes.length > 0;
     border-radius: 3px;
   }
 
+  .verse-first {
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+
+  .drop-cap {
+    float: left;
+    font-family: var(--font-drop-cap), serif;
+    font-size: 4em;
+    line-height: 0.8;
+    padding: 0.05em 0.12em 0.05em 0.08em;
+    margin-right: 0.1em;
+    margin-top: 0.05em;
+    background-color: var(--book-color, var(--color-accent));
+    color: white;
+    font-weight: 700;
+    border-radius: 4px;
+  }
+
   .verse-number {
     font-size: 0.75rem;
-    color: var(--color-muted);
+    color: var(--book-color, var(--color-accent));
     vertical-align: super;
     margin-right: 0.25rem;
   }

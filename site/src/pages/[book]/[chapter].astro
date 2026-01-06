@@ -1,8 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Verse from '../../components/Verse.astro';
+import VerseDivider from '../../components/VerseDivider.astro';
 import Navigation from '../../components/Navigation.astro';
 import Narration from '../../components/Narration.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
 import bible from '../../data/bible.json';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -52,7 +54,7 @@ const nextLink = chapterNum < totalChapters
   : undefined;
 ---
 
-<BaseLayout title={`${book.name} ${chapterNum}`}>
+<BaseLayout title={`${book.name} ${chapterNum}`} bookId={book.id}>
   <Fragment slot="breadcrumb">
     <span class="breadcrumb">
       <span>/</span>
@@ -91,15 +93,21 @@ const nextLink = chapterNum < totalChapters
   <Narration />
 
   <div class="verses">
-    {chapterData.verses.map((verse) => (
-      <Verse
-        number={verse.number}
-        text={verse.text}
-        patched={verse.patched}
-        footnotes={verse.footnotes}
-      />
+    {chapterData.verses.map((verse, index) => (
+      <>
+        {index > 0 && index % 5 === 0 && <VerseDivider />}
+        <Verse
+          number={verse.number}
+          text={verse.text}
+          patched={verse.patched}
+          footnotes={verse.footnotes}
+          isFirst={index === 0}
+        />
+      </>
     ))}
   </div>
+
+  <ReadingProgress bookId={book.id} chapter={chapterNum} />
 
   <Navigation prevLink={prevLink} nextLink={nextLink} />
 </BaseLayout>

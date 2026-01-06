@@ -18,7 +18,7 @@ const base = import.meta.env.BASE_URL;
 ---
 
 <section class="book-section">
-  <h2>{title}</h2>
+  <h3>{title}</h3>
   <ul class="book-list">
     {books.map((book) => (
       <li>
@@ -42,7 +42,17 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   .book-section {
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .book-section h3 {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+    font-family: var(--font-heading);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
   }
 
   .book-list {
@@ -54,8 +64,9 @@ const base = import.meta.env.BASE_URL;
 
   .book-list li {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--color-border);
   }
@@ -63,15 +74,53 @@ const base = import.meta.env.BASE_URL;
   .book-list a {
     color: var(--color-text);
     text-decoration: none;
+    position: relative;
+    display: inline-block;
+    transition: color 0.3s ease;
+  }
+
+  .book-list a::before,
+  .book-list a::after {
+    content: '❧';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7em;
+    color: var(--color-accent);
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  .book-list a::before {
+    right: 100%;
+    margin-right: 0.3em;
+    transform: translateY(-50%) translateX(0.5em) scaleX(-1);
+  }
+
+  .book-list a::after {
+    left: 100%;
+    margin-left: 0.3em;
+    transform: translateY(-50%) translateX(-0.5em);
   }
 
   .book-list a:hover {
     color: var(--color-accent);
   }
 
+  .book-list a:hover::before {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0) scaleX(-1);
+  }
+
+  .book-list a:hover::after {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+  }
+
   .book-meta {
     display: flex;
-    gap: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.35rem;
     align-items: center;
   }
 
@@ -102,7 +151,7 @@ const base = import.meta.env.BASE_URL;
   .illustration-count {
     font-size: 0.7rem;
     color: white;
-    background: #6B4423;
+    background: var(--color-illustration);
     padding: 0.1rem 0.4rem;
     border-radius: 3px;
     font-family: var(--font-sans);

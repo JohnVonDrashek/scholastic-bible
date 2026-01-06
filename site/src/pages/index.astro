@@ -5,17 +5,20 @@ import bible from '../data/bible.json';
 import fs from 'node:fs';
 import path from 'node:path';
 
-const OT_BOOKS = [
-  'genesis', 'exodus', 'leviticus', 'numbers', 'deuteronomy',
-  'josue', 'judges', 'ruth', '1-samuel', '2-samuel',
-  '1-kings', '2-kings', '1-chronicles', '2-chronicles',
-  'ezra', 'nehemiah', 'tobias', 'judith', 'esther',
-  'job', 'psalms', 'proverbs', 'ecclesiastes', 'canticles',
-  'wisdom', 'ecclesiasticus', 'isaias', 'jeremias', 'lamentations',
-  'baruch', 'ezechiel', 'daniel', 'osee', 'joel', 'amos',
-  'abdias', 'jonas', 'micheas', 'nahum', 'habacuc', 'sophonias',
-  'aggeus', 'zacharias', 'malachias', '1-machabees', '2-machabees'
-];
+// Traditional Bible book groupings
+const PENTATEUCH = ['genesis', 'exodus', 'leviticus', 'numbers', 'deuteronomy'];
+const HISTORICAL = ['josue', 'judges', 'ruth', '1-samuel', '2-samuel', '1-kings', '2-kings', '1-chronicles', '2-chronicles', 'ezra', 'nehemiah', 'tobias', 'judith', 'esther', '1-machabees', '2-machabees'];
+const WISDOM = ['job', 'psalms', 'proverbs', 'ecclesiastes', 'canticles', 'wisdom', 'ecclesiasticus'];
+const MAJOR_PROPHETS = ['isaias', 'jeremias', 'lamentations', 'baruch', 'ezechiel', 'daniel'];
+const MINOR_PROPHETS = ['osee', 'joel', 'amos', 'abdias', 'jonas', 'micheas', 'nahum', 'habacuc', 'sophonias', 'aggeus', 'zacharias', 'malachias'];
+
+const GOSPELS = ['matthew', 'mark', 'luke', 'john'];
+const ACTS = ['acts'];
+const PAULINE = ['romans', '1-corinthians', '2-corinthians', 'galatians', 'ephesians', 'philippians', 'colossians', '1-thessalonians', '2-thessalonians', '1-timothy', '2-timothy', 'titus', 'philemon', 'hebrews'];
+const CATHOLIC_EPISTLES = ['james', '1-peter', '2-peter', '1-john', '2-john', '3-john', 'jude'];
+const APOCALYPSE = ['apocalypse'];
+
+const OT_BOOKS = [...PENTATEUCH, ...HISTORICAL, ...WISDOM, ...MAJOR_PROPHETS, ...MINOR_PROPHETS];
 
 // Count illustrations per book
 function countIllustrations(bookId: string): number {
@@ -35,13 +38,27 @@ function countIllustrations(bookId: string): number {
   return count;
 }
 
-const otBooks = bible.books
-  .filter(b => OT_BOOKS.includes(b.id))
-  .map(b => ({ id: b.id, name: b.name, chapters: b.chapters.length, editCount: b.editCount, footnoteCount: b.footnoteCount, illustrationCount: countIllustrations(b.id) }));
+// Helper to get books by IDs in order
+function getBooks(ids: string[]) {
+  return ids
+    .map(id => bible.books.find(b => b.id === id))
+    .filter(Boolean)
+    .map(b => ({ id: b.id, name: b.name, chapters: b.chapters.length, editCount: b.editCount, footnoteCount: b.footnoteCount, illustrationCount: countIllustrations(b.id) }));
+}
 
-const ntBooks = bible.books
-  .filter(b => !OT_BOOKS.includes(b.id))
-  .map(b => ({ id: b.id, name: b.name, chapters: b.chapters.length, editCount: b.editCount, footnoteCount: b.footnoteCount, illustrationCount: countIllustrations(b.id) }));
+// Old Testament groups
+const pentateuchBooks = getBooks(PENTATEUCH);
+const historicalBooks = getBooks(HISTORICAL);
+const wisdomBooks = getBooks(WISDOM);
+const majorProphetBooks = getBooks(MAJOR_PROPHETS);
+const minorProphetBooks = getBooks(MINOR_PROPHETS);
+
+// New Testament groups
+const gospelBooks = getBooks(GOSPELS);
+const actsBooks = getBooks(ACTS);
+const paulineBooks = getBooks(PAULINE);
+const catholicBooks = getBooks(CATHOLIC_EPISTLES);
+const apocalypseBooks = getBooks(APOCALYPSE);
 ---
 
 <BaseLayout title="Home">
@@ -55,8 +72,19 @@ const ntBooks = bible.books
     </div>
   </div>
 
-  <BookList title="Old Testament" books={otBooks} />
-  <BookList title="New Testament" books={ntBooks} />
+  <h2 class="testament-heading">Old Testament</h2>
+  <BookList title="Pentateuch" books={pentateuchBooks} />
+  <BookList title="Historical Books" books={historicalBooks} />
+  <BookList title="Wisdom Books" books={wisdomBooks} />
+  <BookList title="Major Prophets" books={majorProphetBooks} />
+  <BookList title="Minor Prophets" books={minorProphetBooks} />
+
+  <h2 class="testament-heading">New Testament</h2>
+  <BookList title="Gospels" books={gospelBooks} />
+  <BookList title="Acts of the Apostles" books={actsBooks} />
+  <BookList title="Pauline Epistles" books={paulineBooks} />
+  <BookList title="Catholic Epistles" books={catholicBooks} />
+  <BookList title="Apocalypse" books={apocalypseBooks} />
 </BaseLayout>
 
 <style>
@@ -94,5 +122,18 @@ const ntBooks = bible.books
     color: rgba(255, 255, 255, 0.9);
     margin: 0;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .testament-heading {
+    font-size: 1.75rem;
+    font-weight: normal;
+    margin: 2.5rem 0 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .testament-heading:first-of-type {
+    margin-top: 1.5rem;
   }
 </style>

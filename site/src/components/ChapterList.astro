@@ -16,14 +16,16 @@ const { bookId, bookName, chapters } = Astro.props;
 const base = import.meta.env.BASE_URL;
 ---
 
-<div class="chapter-grid">
+<div class="chapter-grid" data-book-id={bookId}>
   {chapters.map((ch) => (
     <a
       href={`${base}${bookId}/${ch.number}/`}
       class:list={["chapter-link", { "has-edits": ch.editCount > 0, "has-illustration": ch.hasIllustration }]}
+      data-chapter={ch.number}
       title={ch.hasIllustration ? 'Illustrated' : (ch.editCount > 0 ? `${ch.editCount} edits, ${ch.footnoteCount} notes` : '')}
     >
       {ch.hasIllustration && <span class="illustration-indicator" title="Illustrated"></span>}
+      <span class="read-indicator" title="Read">✓</span>
       <span class="chapter-num">{ch.number}</span>
       {ch.editCount > 0 && (
         <span class="chapter-badges">
@@ -37,10 +39,11 @@ const base = import.meta.env.BASE_URL;
 
 <style>
   .chapter-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: 1.5rem;
+    justify-content: flex-start;
   }
 
   .chapter-link {
@@ -48,26 +51,125 @@ const base = import.meta.env.BASE_URL;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    width: 70px;
+    height: 80px;
     padding: 0.5rem;
-    background: white;
-    border: 1px solid var(--color-border);
-    border-radius: 4px;
+    background: var(--color-bg);
     color: var(--color-text);
     text-decoration: none;
-    font-family: var(--font-sans);
-    transition: all 0.15s ease;
+    font-family: var(--font-heading);
+    transition: all 0.3s ease;
     position: relative;
+    /* Hexagon shape */
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    /* Staggered entrance animation */
+    opacity: 0;
+    animation: chapter-appear 0.4s ease forwards;
   }
 
-  .chapter-link.has-edits {
+  /* Hexagon border using pseudo-element */
+  .chapter-link::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--color-border);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    z-index: -1;
+    transition: background 0.3s ease;
+  }
+
+  .chapter-link::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: var(--color-bg);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    z-index: -1;
+    transition: background 0.3s ease;
+  }
+
+  /* Staggered entrance - each chapter delays slightly */
+  .chapter-link:nth-child(1) { animation-delay: 0.02s; }
+  .chapter-link:nth-child(2) { animation-delay: 0.04s; }
+  .chapter-link:nth-child(3) { animation-delay: 0.06s; }
+  .chapter-link:nth-child(4) { animation-delay: 0.08s; }
+  .chapter-link:nth-child(5) { animation-delay: 0.1s; }
+  .chapter-link:nth-child(6) { animation-delay: 0.12s; }
+  .chapter-link:nth-child(7) { animation-delay: 0.14s; }
+  .chapter-link:nth-child(8) { animation-delay: 0.16s; }
+  .chapter-link:nth-child(9) { animation-delay: 0.18s; }
+  .chapter-link:nth-child(10) { animation-delay: 0.2s; }
+  .chapter-link:nth-child(n+11) { animation-delay: 0.22s; }
+  .chapter-link:nth-child(n+21) { animation-delay: 0.28s; }
+  .chapter-link:nth-child(n+31) { animation-delay: 0.34s; }
+  .chapter-link:nth-child(n+41) { animation-delay: 0.4s; }
+  .chapter-link:nth-child(n+51) { animation-delay: 0.46s; }
+
+  @keyframes chapter-appear {
+    from {
+      opacity: 0;
+      transform: translateY(10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .chapter-link.has-edits::after {
     background: var(--color-patched);
-    border-color: var(--color-accent);
+  }
+
+  .chapter-link.has-edits::before {
+    background: var(--color-accent);
+  }
+
+  /* Gold shimmer effect on hover */
+  .chapter-link:hover {
+    transform: translateY(-3px) scale(1.05);
+    filter: drop-shadow(0 4px 8px rgba(139, 69, 19, 0.3));
+  }
+
+  .chapter-link:hover::before {
+    background: var(--color-accent);
+  }
+
+  .chapter-link:hover::after {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent) 0%,
+      color-mix(in srgb, var(--color-accent) 80%, gold) 50%,
+      var(--color-accent) 100%
+    );
+    background-size: 200% 200%;
+    animation: gold-shimmer 2s ease infinite;
   }
 
   .chapter-link:hover {
-    background: var(--color-accent);
     color: white;
-    border-color: var(--color-accent);
+  }
+
+  /* Enhanced shimmer for dark mode */
+  :global([data-theme="dark"]) .chapter-link:hover::after {
+    background: linear-gradient(
+      135deg,
+      var(--color-accent) 0%,
+      #d4a84b 25%,
+      #e8c872 50%,
+      #d4a84b 75%,
+      var(--color-accent) 100%
+    );
+    background-size: 300% 300%;
+  }
+
+  :global([data-theme="dark"]) .chapter-link:hover {
+    filter: drop-shadow(0 4px 12px rgba(201, 168, 104, 0.4));
+  }
+
+  @keyframes gold-shimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
   }
 
   .chapter-link:hover .chapter-badge {
@@ -76,7 +178,15 @@ const base = import.meta.env.BASE_URL;
   }
 
   .chapter-num {
-    font-size: 1rem;
+    font-size: 1.4rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    text-shadow: none;
+    transition: text-shadow 0.3s ease;
+  }
+
+  .chapter-link:hover .chapter-num {
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   }
 
   .chapter-badges {
@@ -107,21 +217,88 @@ const base = import.meta.env.BASE_URL;
     color: var(--color-accent);
   }
 
-  .chapter-link.has-illustration {
-    border-color: #6B4423;
+  .chapter-link.has-illustration::before {
+    background: var(--color-illustration);
   }
 
   .illustration-indicator {
     position: absolute;
-    top: 2px;
-    right: 2px;
-    width: 8px;
-    height: 8px;
-    background: #6B4423;
+    top: 8px;
+    right: 8px;
+    width: 10px;
+    height: 10px;
+    background: var(--color-illustration);
     border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    z-index: 1;
   }
 
   .chapter-link:hover .illustration-indicator {
     background: white;
   }
+
+  .read-indicator {
+    display: none;
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    width: 14px;
+    height: 14px;
+    font-size: 0.5rem;
+    color: white;
+    background: var(--book-color, var(--color-accent));
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    z-index: 1;
+  }
+
+  .chapter-link.is-read .read-indicator {
+    display: flex;
+  }
+
+  .chapter-link.is-read::after {
+    background: color-mix(in srgb, var(--book-color, var(--color-accent)) 10%, var(--color-bg));
+  }
+
+  .chapter-link:hover .read-indicator {
+    background: white;
+    color: var(--color-accent);
+  }
 </style>
+
+<script>
+  function setupChapterGrid() {
+    const grid = document.querySelector('.chapter-grid');
+    if (!grid) return;
+
+    const bookId = grid.dataset.bookId;
+    const STORAGE_KEY = 'scholastic-bible-read';
+
+    // Get read chapters from localStorage
+    function getReadChapters(): Record<string, number[]> {
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : {};
+      } catch {
+        return {};
+      }
+    }
+
+    const readData = getReadChapters();
+    const readChapters = readData[bookId] || [];
+
+    // Mark read chapters
+    readChapters.forEach(chapterNum => {
+      const link = grid.querySelector(`a[data-chapter="${chapterNum}"]`);
+      if (link) {
+        link.classList.add('is-read');
+      }
+    });
+  }
+
+  // Run on initial load and after View Transitions navigation
+  document.addEventListener('astro:page-load', setupChapterGrid);
+</script>

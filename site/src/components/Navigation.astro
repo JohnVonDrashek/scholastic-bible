@@ -8,40 +8,164 @@ const { prevLink, nextLink } = Astro.props;
 ---
 
 <nav class="chapter-nav">
-  {prevLink ? (
-    <a href={prevLink.href} class="nav-prev">&larr; {prevLink.label}</a>
-  ) : (
-    <span class="nav-placeholder"></span>
-  )}
+  <div class="nav-divider">
+    <span class="divider-line"></span>
+    <span class="divider-ornament">❦</span>
+    <span class="divider-line"></span>
+  </div>
 
-  {nextLink ? (
-    <a href={nextLink.href} class="nav-next">{nextLink.label} &rarr;</a>
-  ) : (
-    <span class="nav-placeholder"></span>
-  )}
+  <div class="nav-links">
+    {prevLink ? (
+      <a href={prevLink.href} class="nav-link nav-prev">
+        <span class="nav-arrow">❮</span>
+        <span class="nav-content">
+          <span class="nav-direction">Previous</span>
+          <span class="nav-label">{prevLink.label}</span>
+        </span>
+      </a>
+    ) : (
+      <span class="nav-placeholder"></span>
+    )}
+
+    {nextLink ? (
+      <a href={nextLink.href} class="nav-link nav-next">
+        <span class="nav-content">
+          <span class="nav-direction">Next</span>
+          <span class="nav-label">{nextLink.label}</span>
+        </span>
+        <span class="nav-arrow">❯</span>
+      </a>
+    ) : (
+      <span class="nav-placeholder"></span>
+    )}
+  </div>
 </nav>
 
 <style>
   .chapter-nav {
+    margin: 3rem 0 2rem;
+  }
+
+  .nav-divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-border) 20%,
+      var(--color-border) 80%,
+      transparent
+    );
+  }
+
+  .divider-ornament {
+    color: var(--color-accent);
+    font-size: 1.2rem;
+    opacity: 0.7;
+  }
+
+  .nav-links {
     display: flex;
     justify-content: space-between;
-    margin: 2rem 0;
-    padding: 1rem 0;
-    border-top: 1px solid var(--color-border);
-    font-family: var(--font-sans);
-    font-size: 0.9rem;
+    gap: 1rem;
   }
 
-  .chapter-nav a {
-    color: var(--color-accent);
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
     text-decoration: none;
+    transition: all 0.3s ease;
+    min-width: 140px;
   }
 
-  .chapter-nav a:hover {
-    text-decoration: underline;
+  .nav-link:hover {
+    border-color: var(--color-accent);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+
+  .nav-prev {
+    padding-left: 1rem;
+  }
+
+  .nav-next {
+    padding-right: 1rem;
+    margin-left: auto;
+  }
+
+  .nav-arrow {
+    font-size: 1.1rem;
+    color: var(--color-accent);
+    transition: transform 0.3s ease;
+  }
+
+  .nav-prev:hover .nav-arrow {
+    transform: translateX(-4px);
+  }
+
+  .nav-next:hover .nav-arrow {
+    transform: translateX(4px);
+  }
+
+  .nav-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .nav-prev .nav-content {
+    text-align: left;
+  }
+
+  .nav-next .nav-content {
+    text-align: right;
+  }
+
+  .nav-direction {
+    font-family: var(--font-sans);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-muted);
+  }
+
+  .nav-label {
+    font-family: var(--font-heading);
+    font-size: 0.95rem;
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  .nav-link:hover .nav-label {
+    color: var(--color-accent);
   }
 
   .nav-placeholder {
-    /* maintains spacing when only one link */
+    min-width: 140px;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 500px) {
+    .nav-link {
+      min-width: auto;
+      flex: 1;
+      padding: 0.75rem 1rem;
+    }
+
+    .nav-label {
+      font-size: 0.85rem;
+    }
   }
 </style>

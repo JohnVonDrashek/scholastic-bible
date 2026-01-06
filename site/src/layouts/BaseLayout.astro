@@ -200,7 +200,29 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
         text-align: center;
         color: var(--color-muted);
         font-size: 0.875rem;
+      }
+
+      footer .motto {
         font-style: italic;
+        margin-bottom: 0.75rem;
+      }
+
+      footer .links {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        font-family: var(--font-sans);
+        font-size: 0.8rem;
+      }
+
+      footer .links a {
+        color: var(--color-muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+
+      footer .links a:hover {
+        color: var(--color-accent);
       }
 
       .theme-toggle {
@@ -290,7 +312,11 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
         <slot />
       </main>
       <footer>
-        <p>Ad maiorem Dei gloriam</p>
+        <p class="motto">Ad maiorem Dei gloriam</p>
+        <div class="links">
+          <a href="https://github.com/JohnVonDrashek/scholastic-bible" target="_blank" rel="noopener">GitHub</a>
+          <a href="https://vondrashek.com" target="_blank" rel="noopener">vondrashek.com</a>
+        </div>
       </footer>
     </div>
     <script>

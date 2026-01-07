@@ -1,0 +1,222 @@
+---
+interface Props {
+  number: number;
+  text: string;
+  patched?: boolean;
+  footnotes?: string[];
+  isFirst?: boolean;
+}
+
+const { number, text, patched = false, footnotes = [], isFirst = false } = Astro.props;
+const hasFootnotes = footnotes.length > 0;
+
+// Split verse at natural flex point for chanting
+// Priority: colon, semicolon, then find a comma near the middle
+function splitAtFlex(text: string): { first: string; second: string } | null {
+  // Try colon first (strongest break)
+  const colonIdx = text.indexOf(':');
+  if (colonIdx > 0 && colonIdx < text.length - 5) {
+    return {
+      first: text.slice(0, colonIdx + 1).trim(),
+      second: text.slice(colonIdx + 1).trim()
+    };
+  }
+
+  // Try semicolon
+  const semiIdx = text.indexOf(';');
+  if (semiIdx > 0 && semiIdx < text.length - 5) {
+    return {
+      first: text.slice(0, semiIdx + 1).trim(),
+      second: text.slice(semiIdx + 1).trim()
+    };
+  }
+
+  // Find comma nearest to middle
+  const midpoint = text.length / 2;
+  const commas: number[] = [];
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] === ',') commas.push(i);
+  }
+
+  if (commas.length > 0) {
+    // Find comma closest to midpoint, but not too close to edges
+    const validCommas = commas.filter(i => i > text.length * 0.25 && i < text.length * 0.75);
+    if (validCommas.length > 0) {
+      const bestComma = validCommas.reduce((best, curr) =>
+        Math.abs(curr - midpoint) < Math.abs(best - midpoint) ? curr : best
+      );
+      return {
+        first: text.slice(0, bestComma + 1).trim(),
+        second: text.slice(bestComma + 1).trim()
+      };
+    }
+  }
+
+  // Fallback: split at word boundary near middle
+  const words = text.split(' ');
+  if (words.length >= 4) {
+    const splitPoint = Math.ceil(words.length / 2);
+    return {
+      first: words.slice(0, splitPoint).join(' '),
+      second: words.slice(splitPoint).join(' ')
+    };
+  }
+
+  return null; // Can't split meaningfully
+}
+
+const split = splitAtFlex(text);
+const firstLetter = isFirst ? (split ? split.first.charAt(0) : text.charAt(0)) : '';
+const firstHalf = isFirst && split ? split.first.slice(1) : (split ? split.first : text);
+const secondHalf = split ? split.second : null;
+---
+
+<div class:list={["psalm-verse", { patched, "psalm-verse-first": isFirst }]} id={`v${number}`}>
+  {split ? (
+    <div class="psalm-verse-content">
+      <div class="psalm-half psalm-first-half">
+        {isFirst ? (
+          <>
+            <span class="psalm-drop-cap">{firstLetter}</span>
+            <span class="psalm-text">{firstHalf}</span>
+          </>
+        ) : (
+          <>
+            <span class="psalm-number">{number}</span>
+            <span class="psalm-text">{firstHalf}</span>
+          </>
+        )}
+      </div>
+      <div class="psalm-half psalm-second-half">
+        <span class="psalm-text">{secondHalf}</span>
+        {hasFootnotes && (
+          <sup class="footnote-marker" data-verse={number}>*</sup>
+        )}
+      </div>
+    </div>
+  ) : (
+    <div class="psalm-verse-content psalm-unsplit">
+      {isFirst ? (
+        <>
+          <span class="psalm-drop-cap">{firstLetter}</span>
+          <span class="psalm-text">{text.slice(1)}</span>
+        </>
+      ) : (
+        <>
+          <span class="psalm-number">{number}</span>
+          <span class="psalm-text">{text}</span>
+        </>
+      )}
+      {hasFootnotes && (
+        <sup class="footnote-marker" data-verse={number}>*</sup>
+      )}
+    </div>
+  )}
+</div>
+
+{hasFootnotes && (
+  <div class="psalm-footnotes" id={`fn${number}`}>
+    {footnotes.map((note, i) => (
+      <p class="psalm-footnote">
+        <span class="psalm-footnote-ref">{number}.{i + 1}</span> {note}
+      </p>
+    ))}
+  </div>
+)}
+
+<style>
+  .psalm-verse {
+    margin-bottom: 1rem;
+  }
+
+  .psalm-verse.patched {
+    background: var(--color-patched);
+    padding: 0.5rem 0.75rem;
+    margin-left: -0.75rem;
+    margin-right: -0.75rem;
+    border-radius: 4px;
+  }
+
+  .psalm-verse-content {
+    line-height: 1.8;
+  }
+
+  .psalm-half {
+    display: block;
+  }
+
+  .psalm-first-half {
+    /* First half: normal position */
+  }
+
+  .psalm-second-half {
+    /* Second half: deeply indented for visual parallelism */
+    padding-left: 4rem;
+    color: var(--color-text);
+  }
+
+  .psalm-number {
+    display: inline-block;
+    min-width: 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--book-color, var(--color-accent));
+    vertical-align: baseline;
+    margin-right: 0.25rem;
+  }
+
+  .psalm-text {
+    /* Inherits from body */
+  }
+
+  .psalm-drop-cap {
+    float: left;
+    font-family: var(--font-drop-cap), serif;
+    font-size: 3.5em;
+    line-height: 0.85;
+    padding: 0.05em 0.12em 0.05em 0.08em;
+    margin-right: 0.15em;
+    margin-top: 0.05em;
+    background-color: var(--book-color, var(--color-accent));
+    color: white;
+    font-weight: 700;
+    border-radius: 4px;
+  }
+
+  .psalm-verse-first {
+    margin-bottom: 1.25rem;
+  }
+
+  .psalm-verse-first .psalm-second-half {
+    clear: left;
+    padding-top: 0.25rem;
+  }
+
+  .psalm-unsplit {
+    /* Single line verse */
+  }
+
+  .footnote-marker {
+    color: var(--color-accent);
+    cursor: pointer;
+    margin-left: 0.125rem;
+  }
+
+  .psalm-footnotes {
+    margin: 0.25rem 0 1rem 2rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-border);
+    font-size: 0.9rem;
+    color: var(--color-muted);
+  }
+
+  .psalm-footnote {
+    margin-bottom: 0.5rem;
+  }
+
+  .psalm-footnote-ref {
+    font-weight: bold;
+    color: var(--color-accent);
+  }
+
+</style>

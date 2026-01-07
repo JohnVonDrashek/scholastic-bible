@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Verse from '../../components/Verse.astro';
+import PsalmVerse from '../../components/PsalmVerse.astro';
 import VerseDivider from '../../components/VerseDivider.astro';
 import Navigation from '../../components/Navigation.astro';
 import Narration from '../../components/Narration.astro';
@@ -35,6 +36,9 @@ const { book, chapterIndex, chapterData } = Astro.props;
 const chapterNum = chapterIndex + 1;
 const totalChapters = book.chapters.length;
 const base = import.meta.env.BASE_URL;
+
+// Use special psalm formatting for the Book of Psalms
+const isPsalm = book.id === 'psalms';
 
 // Check if chapter header image exists (v1 and v2)
 const imagePath = `images/chapters/${book.id}-${chapterNum}.png`;
@@ -92,17 +96,27 @@ const nextLink = chapterNum < totalChapters
 
   <Narration />
 
-  <div class="verses">
+  <div class:list={["verses", { "psalm-verses": isPsalm }]}>
     {chapterData.verses.map((verse, index) => (
       <>
-        {index > 0 && index % 5 === 0 && <VerseDivider />}
-        <Verse
-          number={verse.number}
-          text={verse.text}
-          patched={verse.patched}
-          footnotes={verse.footnotes}
-          isFirst={index === 0}
-        />
+        {!isPsalm && index > 0 && index % 5 === 0 && <VerseDivider />}
+        {isPsalm ? (
+          <PsalmVerse
+            number={verse.number}
+            text={verse.text}
+            patched={verse.patched}
+            footnotes={verse.footnotes}
+            isFirst={index === 0}
+          />
+        ) : (
+          <Verse
+            number={verse.number}
+            text={verse.text}
+            patched={verse.patched}
+            footnotes={verse.footnotes}
+            isFirst={index === 0}
+          />
+        )}
       </>
     ))}
   </div>
@@ -152,6 +166,11 @@ const nextLink = chapterNum < totalChapters
 
   .verses {
     margin-top: 1.5rem;
+  }
+
+  .psalm-verses {
+    /* Additional spacing for psalm chant format */
+    margin-top: 2rem;
   }
 
   .version-toggle {

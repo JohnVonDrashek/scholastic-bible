@@ -2,406 +2,667 @@
 // Web Speech API narration component for chapter pages
 ---
 
-<div class="narration-controls">
-  <button id="narration-btn" class="narration-btn" title="Listen to chapter">
-    <svg class="icon-play" viewBox="0 0 24 24" width="20" height="20">
-      <path fill="currentColor" d="M8 5v14l11-7z"/>
+<div class="narration-bar">
+  <div class="narration-header">
+    <svg class="narration-icon" viewBox="0 0 24 24" width="18" height="18">
+      <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
     </svg>
-    <svg class="icon-pause" viewBox="0 0 24 24" width="20" height="20" style="display:none">
-      <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
-    </svg>
-    <span class="narration-label">Listen</span>
-  </button>
-  <button id="narration-stop" class="narration-stop" title="Stop" style="display:none">
-    <svg viewBox="0 0 24 24" width="16" height="16">
-      <path fill="currentColor" d="M6 6h12v12H6z"/>
-    </svg>
-  </button>
-
-  <div class="verse-progress">
-    <select id="verse-select" class="verse-num-select" title="Start from verse">
-      <option value="0">1</option>
-    </select>
-    <span class="verse-total">/ <span id="verse-total">1</span></span>
+    <span class="narration-title">Listen to Chapter</span>
   </div>
 
-  <div class="voice-selector">
+  <div class="narration-controls">
+    <div class="playback-controls">
+      <button id="narration-btn" class="narration-btn" title="Listen to chapter">
+        <svg class="icon-play" viewBox="0 0 24 24" width="22" height="22">
+          <path fill="currentColor" d="M8 5v14l11-7z"/>
+        </svg>
+        <svg class="icon-pause" viewBox="0 0 24 24" width="22" height="22" style="display:none">
+          <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
+        </svg>
+      </button>
+      <button id="narration-stop" class="narration-stop" title="Stop" style="display:none">
+        <svg viewBox="0 0 24 24" width="16" height="16">
+          <path fill="currentColor" d="M6 6h12v12H6z"/>
+        </svg>
+      </button>
+      <span id="narration-status" class="narration-status">Ready</span>
+    </div>
+
+    <div class="narration-divider"></div>
+
+    <div class="verse-selector">
+      <span class="control-label">Verse</span>
+      <div class="verse-progress">
+        <input type="number" id="verse-input" class="verse-num-input" min="1" max="1" value="1" title="Start from verse" />
+        <span class="verse-total">of <span id="verse-total">1</span></span>
+      </div>
+    </div>
+
+    <div class="narration-divider"></div>
+
+    <div class="speed-selector">
+      <span class="control-label">Speed</span>
+      <select id="speed-select" class="speed-select" title="Playback speed">
+        <option value="0.5">0.5x</option>
+        <option value="0.75">0.75x</option>
+        <option value="0.9" selected>0.9x</option>
+        <option value="1">1x</option>
+        <option value="1.25">1.25x</option>
+        <option value="1.5">1.5x</option>
+        <option value="2">2x</option>
+      </select>
+    </div>
+
+    <label class="scroll-toggle" title="Auto-scroll to current verse">
+      <input type="checkbox" id="auto-scroll" checked />
+      <svg class="scroll-icon" viewBox="0 0 24 24" width="16" height="16">
+        <path fill="currentColor" d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/>
+      </svg>
+      <span class="scroll-label">Auto-scroll</span>
+    </label>
+  </div>
+
+  <div class="voice-row">
+    <svg class="voice-icon" viewBox="0 0 24 24" width="14" height="14">
+      <path fill="currentColor" d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>
+    </svg>
     <label for="voice-select" class="voice-label">Voice:</label>
     <select id="voice-select" class="voice-select">
       <option value="">Loading voices...</option>
     </select>
   </div>
-
-  <label class="scroll-toggle" title="Auto-scroll to current verse">
-    <input type="checkbox" id="auto-scroll" checked />
-    <span class="scroll-label">Scroll</span>
-  </label>
-
-  <select id="speed-select" class="speed-select" title="Playback speed">
-    <option value="0.5">0.5x</option>
-    <option value="0.75">0.75x</option>
-    <option value="0.9" selected>0.9x</option>
-    <option value="1">1x</option>
-    <option value="1.25">1.25x</option>
-    <option value="1.5">1.5x</option>
-    <option value="2">2x</option>
-  </select>
 </div>
 
 <script>
-  const btn = document.getElementById('narration-btn') as HTMLButtonElement;
-  const stopBtn = document.getElementById('narration-stop') as HTMLButtonElement;
-  const voiceSelect = document.getElementById('voice-select') as HTMLSelectElement;
-  const verseSelect = document.getElementById('verse-select') as HTMLSelectElement;
-  const verseTotal = document.getElementById('verse-total') as HTMLSpanElement;
-  const autoScrollCheckbox = document.getElementById('auto-scroll') as HTMLInputElement;
-  const speedSelect = document.getElementById('speed-select') as HTMLSelectElement;
-  const iconPlay = btn?.querySelector('.icon-play') as SVGElement;
-  const iconPause = btn?.querySelector('.icon-pause') as SVGElement;
-  const label = btn?.querySelector('.narration-label') as HTMLSpanElement;
+  function setupNarration() {
+    const btn = document.getElementById('narration-btn') as HTMLButtonElement;
+    const stopBtn = document.getElementById('narration-stop') as HTMLButtonElement;
+    const voiceSelect = document.getElementById('voice-select') as HTMLSelectElement;
+    const verseInput = document.getElementById('verse-input') as HTMLInputElement;
+    const verseTotal = document.getElementById('verse-total') as HTMLSpanElement;
+    const autoScrollCheckbox = document.getElementById('auto-scroll') as HTMLInputElement;
+    const speedSelect = document.getElementById('speed-select') as HTMLSelectElement;
 
-  let utterance: SpeechSynthesisUtterance | null = null;
-  let verses: { number: string; text: string; element: Element }[] = [];
-  let currentIndex = 0;
-  let isPlaying = false;
-  let isPaused = false;
-  let availableVoices: SpeechSynthesisVoice[] = [];
-  let selectedVoice: SpeechSynthesisVoice | null = null;
+    if (!btn) return; // Not on a chapter page
 
-  const STORAGE_KEY = 'scholastic-bible-voice';
-  const SCROLL_STORAGE_KEY = 'scholastic-bible-autoscroll';
-  const SPEED_STORAGE_KEY = 'scholastic-bible-speed';
+    const iconPlay = btn.querySelector('.icon-play') as SVGElement;
+    const iconPause = btn.querySelector('.icon-pause') as SVGElement;
+    const statusEl = document.getElementById('narration-status') as HTMLSpanElement;
 
-  // Load speed preference
-  const savedSpeed = localStorage.getItem(SPEED_STORAGE_KEY);
-  if (savedSpeed && speedSelect) {
-    speedSelect.value = savedSpeed;
-  }
+    let utterance: SpeechSynthesisUtterance | null = null;
+    let verses: { number: string; text: string; element: Element }[] = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let isPaused = false;
+    let availableVoices: SpeechSynthesisVoice[] = [];
+    let selectedVoice: SpeechSynthesisVoice | null = null;
 
-  // Save speed preference on change
-  speedSelect?.addEventListener('change', () => {
-    localStorage.setItem(SPEED_STORAGE_KEY, speedSelect.value);
-    // If playing, restart current verse with new speed
-    if (isPlaying && !isPaused) {
+    const STORAGE_KEY = 'scholastic-bible-voice';
+    const SCROLL_STORAGE_KEY = 'scholastic-bible-autoscroll';
+    const SPEED_STORAGE_KEY = 'scholastic-bible-speed';
+
+    // Load speed preference
+    const savedSpeed = localStorage.getItem(SPEED_STORAGE_KEY);
+    if (savedSpeed && speedSelect) {
+      speedSelect.value = savedSpeed;
+    }
+
+    // macOS novelty/musical voices that aren't suitable for reading
+    const NOVELTY_VOICES = new Set([
+      'bad news', 'bahh', 'bells', 'boing', 'bubbles', 'cellos',
+      'good news', 'jester', 'junior', 'organ', 'superstar',
+      'trinoids', 'whisper', 'wobble', 'zarvox', 'albert',
+      'fred', 'hysterical', 'pipe organ', 'princess', 'ralph'
+    ]);
+
+    // Check if voice is a novelty/musical voice
+    function isNoveltyVoice(voice: SpeechSynthesisVoice): boolean {
+      const name = voice.name.toLowerCase();
+      return NOVELTY_VOICES.has(name) ||
+             name.includes('(novelty)') ||
+             name.includes('(musical)');
+    }
+
+    // Score voices to find best defaults
+    function scoreVoice(voice: SpeechSynthesisVoice): number {
+      let score = 0;
+      const name = voice.name.toLowerCase();
+      const lang = voice.lang.toLowerCase();
+
+      // Must be English
+      if (!lang.startsWith('en')) return -1000;
+
+      // Novelty voices get low score
+      if (isNoveltyVoice(voice)) return -500;
+
+      // Prefer US/UK English
+      if (lang === 'en-us' || lang === 'en-gb') score += 10;
+
+      // Google voices are high quality (Chrome)
+      if (name.includes('google')) score += 50;
+
+      // Google UK English Male is particularly good for scripture reading
+      if (name.includes('google uk english male')) score += 30;
+
+      // Enhanced/Premium voices (macOS)
+      if (name.includes('enhanced') || name.includes('premium')) score += 40;
+
+      // Specific high-quality voices
+      if (name.includes('daniel')) score += 35; // Best for scripture on macOS
+      if (name.includes('samantha')) score += 25;
+      if (name.includes('karen')) score += 25;
+      if (name.includes('moira')) score += 25;
+
+      // Microsoft natural voices
+      if (name.includes('natural')) score += 35;
+
+      // Avoid compact/small voices
+      if (name.includes('compact')) score -= 20;
+
+      // Prefer non-local voices (often higher quality)
+      if (!voice.localService) score += 15;
+
+      return score;
+    }
+
+    // Populate voice dropdown
+    function populateVoices() {
+      availableVoices = speechSynthesis.getVoices();
+
+      // Filter to English voices and categorize
+      const englishVoices = availableVoices
+        .filter(v => v.lang.toLowerCase().startsWith('en'))
+        .map(v => ({ voice: v, score: scoreVoice(v), isNovelty: isNoveltyVoice(v) }));
+
+      // Separate into categories
+      const recommendedVoices = englishVoices
+        .filter(v => v.score >= 40)
+        .sort((a, b) => b.score - a.score);
+
+      const standardVoices = englishVoices
+        .filter(v => v.score >= 0 && v.score < 40)
+        .sort((a, b) => b.score - a.score);
+
+      const noveltyVoices = englishVoices
+        .filter(v => v.isNovelty)
+        .sort((a, b) => a.voice.name.localeCompare(b.voice.name));
+
+      if (englishVoices.length === 0) {
+        if (voiceSelect) voiceSelect.innerHTML = '<option value="">No English voices found</option>';
+        return;
+      }
+
+      // Build grouped options
+      if (voiceSelect) {
+        let html = '';
+
+        if (recommendedVoices.length > 0) {
+          html += '<optgroup label="Recommended">';
+          html += recommendedVoices.map(({ voice }) => {
+            const network = voice.localService ? '' : ' (network)';
+            return `<option value="${voice.name}">${voice.name}${network}</option>`;
+          }).join('');
+          html += '</optgroup>';
+        }
+
+        if (standardVoices.length > 0) {
+          html += '<optgroup label="Standard">';
+          html += standardVoices.map(({ voice }) => {
+            const network = voice.localService ? '' : ' (network)';
+            return `<option value="${voice.name}">${voice.name}${network}</option>`;
+          }).join('');
+          html += '</optgroup>';
+        }
+
+        if (noveltyVoices.length > 0) {
+          html += '<optgroup label="Novelty & Musical">';
+          html += noveltyVoices.map(({ voice }) =>
+            `<option value="${voice.name}">${voice.name}</option>`
+          ).join('');
+          html += '</optgroup>';
+        }
+
+        voiceSelect.innerHTML = html;
+
+        // Restore saved preference or use best default
+        const saved = localStorage.getItem(STORAGE_KEY);
+        const allVoices = [...recommendedVoices, ...standardVoices, ...noveltyVoices];
+        if (saved && allVoices.some(v => v.voice.name === saved)) {
+          voiceSelect.value = saved;
+          selectedVoice = availableVoices.find(v => v.name === saved) || null;
+        } else if (recommendedVoices.length > 0) {
+          // Use highest scored voice
+          voiceSelect.value = recommendedVoices[0].voice.name;
+          selectedVoice = recommendedVoices[0].voice;
+        } else if (standardVoices.length > 0) {
+          voiceSelect.value = standardVoices[0].voice.name;
+          selectedVoice = standardVoices[0].voice;
+        }
+      }
+    }
+
+    // Gather all verses on the page and update verse input constraints
+    function gatherVerses() {
+      // Save current value before updating
+      const savedValue = verseInput?.value;
+
+      verses = [];
+      document.querySelectorAll('.verse').forEach((el) => {
+        const numEl = el.querySelector('.verse-number');
+        const dropCapEl = el.querySelector('.drop-cap');
+        const textEl = el.querySelector('.verse-text');
+
+        // Verse 1 uses drop-cap instead of verse-number for aesthetics
+        if (textEl && (numEl || dropCapEl)) {
+          // For drop-cap verse (verse 1), prepend the drop cap letter to the text
+          const verseNumber = numEl ? (numEl.textContent || '') : '1';
+          const verseText = dropCapEl
+            ? (dropCapEl.textContent || '') + (textEl.textContent || '')
+            : (textEl.textContent || '');
+
+          verses.push({
+            number: verseNumber,
+            text: verseText,
+            element: el
+          });
+        }
+      });
+
+      // Update verse input constraints
+      if (verseInput && verses.length > 0) {
+        verseInput.min = '1';
+        verseInput.max = String(verses.length);
+
+        // Restore value if valid, otherwise reset to 1
+        const savedNum = parseInt(savedValue || '1', 10);
+        if (savedNum >= 1 && savedNum <= verses.length) {
+          verseInput.value = savedValue || '1';
+        } else {
+          verseInput.value = '1';
+        }
+      }
+
+      // Update total count
+      if (verseTotal) {
+        verseTotal.textContent = String(verses.length);
+      }
+    }
+
+    // Highlight current verse
+    function highlightVerse(index: number) {
+      document.querySelectorAll('.verse.reading').forEach(el => el.classList.remove('reading'));
+      if (verses[index]) {
+        verses[index].element.classList.add('reading');
+        // Only scroll if auto-scroll is enabled
+        if (autoScrollCheckbox?.checked) {
+          verses[index].element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }
+    }
+
+    // Update UI state
+    function updateUI() {
+      if (isPlaying && !isPaused) {
+        iconPlay.style.display = 'none';
+        iconPause.style.display = 'block';
+        if (statusEl) statusEl.textContent = 'Playing';
+        stopBtn.style.display = 'flex';
+      } else if (isPaused) {
+        iconPlay.style.display = 'block';
+        iconPause.style.display = 'none';
+        if (statusEl) statusEl.textContent = 'Paused';
+        stopBtn.style.display = 'flex';
+      } else {
+        iconPlay.style.display = 'block';
+        iconPause.style.display = 'none';
+        if (statusEl) statusEl.textContent = 'Ready';
+        stopBtn.style.display = 'none';
+      }
+    }
+
+    // Speak a single verse
+    function speakVerse(index: number) {
+      if (index >= verses.length) {
+        // Finished all verses
+        stop();
+        return;
+      }
+
+      currentIndex = index;
+      const verse = verses[index];
+
+      // Update verse input to show current verse (1-indexed for display)
+      if (verseInput) {
+        verseInput.value = String(index + 1);
+      }
+
+      highlightVerse(index);
+
+      utterance = new SpeechSynthesisUtterance(verse.text);
+      utterance.rate = speedSelect ? parseFloat(speedSelect.value) : 0.9;
+      utterance.pitch = 1;
+
+      // Apply selected voice
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
+      utterance.onend = () => {
+        if (isPlaying && !isPaused) {
+          speakVerse(index + 1);
+        }
+      };
+
+      utterance.onerror = (e) => {
+        if (e.error !== 'interrupted') {
+          console.error('Speech error:', e);
+        }
+      };
+
+      speechSynthesis.speak(utterance);
+    }
+
+    // Start/resume playback
+    function play() {
+      if (isPaused) {
+        speechSynthesis.resume();
+        isPaused = false;
+        isPlaying = true;
+      } else {
+        gatherVerses();
+        if (verses.length === 0) return;
+        // Start from selected verse (convert 1-indexed input to 0-indexed)
+        const inputVal = verseInput ? parseInt(verseInput.value, 10) : 1;
+        const startIndex = isNaN(inputVal) ? 0 : Math.max(0, Math.min(inputVal - 1, verses.length - 1));
+        currentIndex = startIndex;
+        isPlaying = true;
+        isPaused = false;
+        speakVerse(currentIndex);
+      }
+      updateUI();
+    }
+
+    // Pause playback
+    function pause() {
+      speechSynthesis.pause();
+      isPaused = true;
+      updateUI();
+    }
+
+    // Stop playback
+    function stop() {
       speechSynthesis.cancel();
-      speakVerse(currentIndex);
-    }
-  });
-
-  // Load auto-scroll preference
-  const savedScroll = localStorage.getItem(SCROLL_STORAGE_KEY);
-  if (savedScroll !== null && autoScrollCheckbox) {
-    autoScrollCheckbox.checked = savedScroll === 'true';
-  }
-
-  // Save auto-scroll preference on change
-  autoScrollCheckbox?.addEventListener('change', () => {
-    localStorage.setItem(SCROLL_STORAGE_KEY, String(autoScrollCheckbox.checked));
-  });
-
-  // Score voices to find best defaults
-  function scoreVoice(voice: SpeechSynthesisVoice): number {
-    let score = 0;
-    const name = voice.name.toLowerCase();
-    const lang = voice.lang.toLowerCase();
-
-    // Must be English
-    if (!lang.startsWith('en')) return -1000;
-
-    // Prefer US/UK English
-    if (lang === 'en-us' || lang === 'en-gb') score += 10;
-
-    // Google voices are high quality (Chrome)
-    if (name.includes('google')) score += 50;
-
-    // Google UK English Male is particularly good for scripture reading
-    if (name.includes('google uk english male')) score += 30;
-
-    // Enhanced/Premium voices (macOS)
-    if (name.includes('enhanced') || name.includes('premium')) score += 40;
-
-    // Specific high-quality voices
-    if (name.includes('daniel')) score += 35; // Best for scripture on macOS
-    if (name.includes('samantha')) score += 25;
-    if (name.includes('karen')) score += 25;
-    if (name.includes('moira')) score += 25;
-
-    // Microsoft natural voices
-    if (name.includes('natural')) score += 35;
-
-    // Avoid compact/small voices
-    if (name.includes('compact')) score -= 20;
-
-    // Prefer non-local voices (often higher quality)
-    if (!voice.localService) score += 15;
-
-    return score;
-  }
-
-  // Populate voice dropdown
-  function populateVoices() {
-    availableVoices = speechSynthesis.getVoices();
-
-    // Filter to English voices and sort by quality score
-    const englishVoices = availableVoices
-      .filter(v => v.lang.toLowerCase().startsWith('en'))
-      .map(v => ({ voice: v, score: scoreVoice(v) }))
-      .sort((a, b) => b.score - a.score);
-
-    if (englishVoices.length === 0) {
-      voiceSelect.innerHTML = '<option value="">No English voices found</option>';
-      return;
+      isPlaying = false;
+      isPaused = false;
+      currentIndex = 0;
+      document.querySelectorAll('.verse.reading').forEach(el => el.classList.remove('reading'));
+      // Reset verse input to first verse
+      if (verseInput) {
+        verseInput.value = '1';
+      }
+      updateUI();
     }
 
-    // Build options with quality indicators
-    voiceSelect.innerHTML = englishVoices.map(({ voice, score }) => {
-      const quality = score >= 40 ? ' *' : '';
-      const local = voice.localService ? '' : ' (network)';
-      return `<option value="${voice.name}">${voice.name}${quality}${local}</option>`;
-    }).join('');
-
-    // Restore saved preference or use best default
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved && englishVoices.some(v => v.voice.name === saved)) {
-      voiceSelect.value = saved;
-      selectedVoice = availableVoices.find(v => v.name === saved) || null;
-    } else {
-      // Use highest scored voice
-      voiceSelect.value = englishVoices[0].voice.name;
-      selectedVoice = englishVoices[0].voice;
+    // Load auto-scroll preference
+    const savedScroll = localStorage.getItem(SCROLL_STORAGE_KEY);
+    if (savedScroll !== null && autoScrollCheckbox) {
+      autoScrollCheckbox.checked = savedScroll === 'true';
     }
-  }
 
-  // Handle voice change
-  voiceSelect?.addEventListener('change', () => {
-    const name = voiceSelect.value;
-    selectedVoice = availableVoices.find(v => v.name === name) || null;
-    localStorage.setItem(STORAGE_KEY, name);
+    // Clone buttons to remove old event listeners
+    const newBtn = btn.cloneNode(true) as HTMLButtonElement;
+    btn.parentNode?.replaceChild(newBtn, btn);
 
-    // If currently playing, restart current verse with new voice
-    if (isPlaying && !isPaused) {
+    const newStopBtn = stopBtn.cloneNode(true) as HTMLButtonElement;
+    stopBtn.parentNode?.replaceChild(newStopBtn, stopBtn);
+
+    // Get references from cloned elements
+    const activeIconPlay = newBtn.querySelector('.icon-play') as SVGElement;
+    const activeIconPause = newBtn.querySelector('.icon-pause') as SVGElement;
+    const activeStatusEl = document.getElementById('narration-status') as HTMLSpanElement;
+
+    // Override updateUI to use new references
+    function updateUIActive() {
+      if (isPlaying && !isPaused) {
+        activeIconPlay.style.display = 'none';
+        activeIconPause.style.display = 'block';
+        if (activeStatusEl) activeStatusEl.textContent = 'Playing';
+        newStopBtn.style.display = 'flex';
+      } else if (isPaused) {
+        activeIconPlay.style.display = 'block';
+        activeIconPause.style.display = 'none';
+        if (activeStatusEl) activeStatusEl.textContent = 'Paused';
+        newStopBtn.style.display = 'flex';
+      } else {
+        activeIconPlay.style.display = 'block';
+        activeIconPause.style.display = 'none';
+        if (activeStatusEl) activeStatusEl.textContent = 'Ready';
+        newStopBtn.style.display = 'none';
+      }
+    }
+
+    // Speak verse using active UI
+    function speakVerseActive(index: number) {
+      if (index >= verses.length) {
+        stopActive();
+        return;
+      }
+
+      currentIndex = index;
+      const verse = verses[index];
+
+      // Update verse input (1-indexed for display)
+      if (verseInput) {
+        verseInput.value = String(index + 1);
+      }
+
+      highlightVerse(index);
+
+      utterance = new SpeechSynthesisUtterance(verse.text);
+      utterance.rate = speedSelect ? parseFloat(speedSelect.value) : 0.9;
+      utterance.pitch = 1;
+
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+
+      utterance.onend = () => {
+        if (isPlaying && !isPaused) {
+          speakVerseActive(index + 1);
+        }
+      };
+
+      utterance.onerror = (e) => {
+        if (e.error !== 'interrupted') {
+          console.error('Speech error:', e);
+        }
+      };
+
+      speechSynthesis.speak(utterance);
+    }
+
+    // Override play/pause/stop to use new UI function
+    function playActive() {
+      if (isPaused) {
+        speechSynthesis.resume();
+        isPaused = false;
+        isPlaying = true;
+      } else {
+        gatherVerses();
+        if (verses.length === 0) return;
+        // Convert 1-indexed input to 0-indexed
+        const inputVal = verseInput ? parseInt(verseInput.value, 10) : 1;
+        const startIndex = isNaN(inputVal) ? 0 : Math.max(0, Math.min(inputVal - 1, verses.length - 1));
+        currentIndex = startIndex;
+        isPlaying = true;
+        isPaused = false;
+        speakVerseActive(currentIndex);
+      }
+      updateUIActive();
+    }
+
+    function pauseActive() {
+      speechSynthesis.pause();
+      isPaused = true;
+      updateUIActive();
+    }
+
+    function stopActive() {
       speechSynthesis.cancel();
-      speakVerse(currentIndex);
+      isPlaying = false;
+      isPaused = false;
+      currentIndex = 0;
+      document.querySelectorAll('.verse.reading').forEach(el => el.classList.remove('reading'));
+      if (verseInput) {
+        verseInput.value = '1';
+      }
+      updateUIActive();
     }
-  });
 
-  // Load voices (may be async in some browsers)
-  populateVoices();
-  if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = populateVoices;
-  }
-
-  // Gather all verses on the page and populate verse selector
-  function gatherVerses() {
-    // Save current selection before repopulating
-    const savedSelection = verseSelect?.value;
-
-    verses = [];
-    document.querySelectorAll('.verse').forEach((el) => {
-      const numEl = el.querySelector('.verse-number');
-      const textEl = el.querySelector('.verse-text');
-      if (numEl && textEl) {
-        verses.push({
-          number: numEl.textContent || '',
-          text: textEl.textContent || '',
-          element: el
-        });
+    // Button handlers
+    newBtn.addEventListener('click', () => {
+      if (isPlaying && !isPaused) {
+        pauseActive();
+      } else {
+        playActive();
       }
     });
 
-    // Populate verse selector
-    if (verseSelect && verses.length > 0) {
-      verseSelect.innerHTML = verses.map((v, i) =>
-        `<option value="${i}">${v.number}</option>`
-      ).join('');
+    newStopBtn.addEventListener('click', stopActive);
 
-      // Restore selection
-      if (savedSelection !== undefined) {
-        verseSelect.value = savedSelection;
-      }
-    }
-
-    // Update total count
-    if (verseTotal) {
-      verseTotal.textContent = String(verses.length);
-    }
-  }
-
-  // Populate verses on load
-  gatherVerses();
-
-  // Handle verse selection change
-  verseSelect?.addEventListener('change', () => {
-    const newIndex = parseInt(verseSelect.value, 10);
-    if (!isNaN(newIndex)) {
-      currentIndex = newIndex;
-      // If playing, restart from new verse
+    // Event listeners for selects
+    speedSelect?.addEventListener('change', () => {
+      localStorage.setItem(SPEED_STORAGE_KEY, speedSelect.value);
       if (isPlaying && !isPaused) {
         speechSynthesis.cancel();
-        speakVerse(currentIndex);
+        speakVerseActive(currentIndex);
       }
-    }
-  });
+    });
 
-  // Highlight current verse
-  function highlightVerse(index: number) {
-    document.querySelectorAll('.verse.reading').forEach(el => el.classList.remove('reading'));
-    if (verses[index]) {
-      verses[index].element.classList.add('reading');
-      // Only scroll if auto-scroll is enabled
-      if (autoScrollCheckbox?.checked) {
-        verses[index].element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }
-  }
+    autoScrollCheckbox?.addEventListener('change', () => {
+      localStorage.setItem(SCROLL_STORAGE_KEY, String(autoScrollCheckbox.checked));
+    });
 
-  // Update UI state
-  function updateUI() {
-    if (isPlaying && !isPaused) {
-      iconPlay.style.display = 'none';
-      iconPause.style.display = 'block';
-      label.textContent = 'Pause';
-      stopBtn.style.display = 'flex';
-    } else if (isPaused) {
-      iconPlay.style.display = 'block';
-      iconPause.style.display = 'none';
-      label.textContent = 'Resume';
-      stopBtn.style.display = 'flex';
-    } else {
-      iconPlay.style.display = 'block';
-      iconPause.style.display = 'none';
-      label.textContent = 'Listen';
-      stopBtn.style.display = 'none';
-    }
-  }
-
-  // Speak a single verse
-  function speakVerse(index: number) {
-    if (index >= verses.length) {
-      // Finished all verses
-      stop();
-      return;
-    }
-
-    currentIndex = index;
-    const verse = verses[index];
-
-    // Update verse selector to show current verse
-    if (verseSelect) {
-      verseSelect.value = String(index);
-    }
-
-    highlightVerse(index);
-
-    utterance = new SpeechSynthesisUtterance(verse.text);
-    utterance.rate = speedSelect ? parseFloat(speedSelect.value) : 0.9;
-    utterance.pitch = 1;
-
-    // Apply selected voice
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-
-    utterance.onend = () => {
+    voiceSelect?.addEventListener('change', () => {
+      const name = voiceSelect.value;
+      selectedVoice = availableVoices.find(v => v.name === name) || null;
+      localStorage.setItem(STORAGE_KEY, name);
       if (isPlaying && !isPaused) {
-        speakVerse(index + 1);
+        speechSynthesis.cancel();
+        speakVerseActive(currentIndex);
       }
-    };
+    });
 
-    utterance.onerror = (e) => {
-      if (e.error !== 'interrupted') {
-        console.error('Speech error:', e);
+    verseInput?.addEventListener('change', () => {
+      // Constrain value to valid range
+      let val = parseInt(verseInput.value, 10);
+      if (isNaN(val) || val < 1) val = 1;
+      if (val > verses.length) val = verses.length;
+      verseInput.value = String(val);
+
+      // Convert to 0-indexed
+      const newIndex = val - 1;
+      currentIndex = newIndex;
+      if (isPlaying && !isPaused) {
+        speechSynthesis.cancel();
+        speakVerseActive(currentIndex);
       }
-    };
+    });
 
-    speechSynthesis.speak(utterance);
-  }
-
-  // Start/resume playback
-  function play() {
-    if (isPaused) {
-      speechSynthesis.resume();
-      isPaused = false;
-      isPlaying = true;
-    } else {
-      gatherVerses();
-      if (verses.length === 0) return;
-      // Start from selected verse
-      const startIndex = verseSelect ? parseInt(verseSelect.value, 10) : 0;
-      currentIndex = isNaN(startIndex) ? 0 : startIndex;
-      isPlaying = true;
-      isPaused = false;
-      speakVerse(currentIndex);
+    // Load voices (may be async in some browsers)
+    populateVoices();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = populateVoices;
     }
-    updateUI();
+
+    // Populate verses after DOM is ready
+    gatherVerses();
+
+    // Clean up on page navigation
+    document.addEventListener('astro:before-preparation', stopActive);
   }
 
-  // Pause playback
-  function pause() {
-    speechSynthesis.pause();
-    isPaused = true;
-    updateUI();
-  }
-
-  // Stop playback
-  function stop() {
-    speechSynthesis.cancel();
-    isPlaying = false;
-    isPaused = false;
-    currentIndex = 0;
-    document.querySelectorAll('.verse.reading').forEach(el => el.classList.remove('reading'));
-    // Reset verse selector to first verse
-    if (verseSelect) {
-      verseSelect.value = '0';
-    }
-    updateUI();
-  }
-
-  // Button handlers
-  btn?.addEventListener('click', () => {
-    if (isPlaying && !isPaused) {
-      pause();
-    } else {
-      play();
-    }
-  });
-
-  stopBtn?.addEventListener('click', stop);
-
-  // Clean up on page navigation
-  document.addEventListener('astro:before-preparation', stop);
+  // Run on initial load and after View Transitions navigation
+  document.addEventListener('astro:page-load', setupNarration);
 </script>
 
 <style>
-  .narration-controls {
+  .narration-bar {
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--color-patched) 0%, color-mix(in srgb, var(--color-patched) 80%, var(--color-bg)) 100%);
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    overflow: hidden;
+  }
+
+  [data-theme="dark"] .narration-bar {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .narration-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 1.5rem;
     padding: 0.75rem 1rem;
-    background: var(--color-patched);
-    border-radius: 6px;
-    border: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.02));
+  }
+
+  [data-theme="dark"] .narration-header {
+    background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.1));
+  }
+
+  .narration-icon {
+    color: var(--color-accent);
+    flex-shrink: 0;
+  }
+
+  .narration-title {
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+    color: var(--color-text);
+    text-transform: uppercase;
+  }
+
+  .narration-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
     flex-wrap: wrap;
+  }
+
+  .playback-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
   }
 
   .narration-btn {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.5rem 1rem;
-    background: var(--color-accent);
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--color-accent) 0%, color-mix(in srgb, var(--color-accent) 85%, black) 100%);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 50%;
     cursor: pointer;
-    font-family: var(--font-sans);
-    font-size: 0.9rem;
-    transition: background 0.15s ease;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
   }
 
   .narration-btn:hover {
-    background: color-mix(in srgb, var(--color-accent) 80%, black);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.4);
+  }
+
+  .narration-btn:active {
+    transform: scale(0.98);
   }
 
   .narration-stop {
@@ -410,109 +671,176 @@
     justify-content: center;
     width: 32px;
     height: 32px;
-    background: var(--color-muted);
-    color: white;
-    border: none;
-    border-radius: 4px;
+    background: var(--color-bg);
+    color: var(--color-muted);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: all 0.2s ease;
   }
 
   .narration-stop:hover {
-    background: color-mix(in srgb, var(--color-muted) 70%, black);
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .narration-status {
+    font-family: var(--font-sans);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 50px;
+  }
+
+  .narration-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--color-border);
+    margin: 0 0.25rem;
+  }
+
+  .verse-selector,
+  .speed-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+
+  .control-label {
+    font-family: var(--font-sans);
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   .verse-progress {
     display: flex;
     align-items: center;
-    gap: 0.2rem;
-    margin-left: 0.75rem;
+    gap: 0.3rem;
     font-family: var(--font-sans);
-    font-size: 0.9rem;
-    color: var(--color-muted);
+    font-size: 0.85rem;
+    color: var(--color-text);
   }
 
-  .verse-num-select {
+  .verse-num-input {
     font-family: var(--font-sans);
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
-    padding: 0.15rem 0.3rem;
+    padding: 0.2rem 0.4rem;
     border: 1px solid var(--color-border);
-    border-radius: 3px;
+    border-radius: 4px;
     background: var(--color-bg);
     color: var(--color-text);
-    min-width: 40px;
+    width: 48px;
     text-align: center;
-    cursor: pointer;
-    appearance: none;
+    transition: border-color 0.15s ease;
+    -moz-appearance: textfield;
+  }
+
+  .verse-num-input::-webkit-outer-spin-button,
+  .verse-num-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
+    margin: 0;
   }
 
-  .verse-num-select:hover {
+  .verse-num-input:hover,
+  .verse-num-input:focus {
     border-color: var(--color-accent);
-  }
-
-  .verse-num-select:focus {
     outline: none;
-    border-color: var(--color-accent);
   }
 
   .verse-total {
     color: var(--color-muted);
+    font-weight: 400;
+  }
+
+  .speed-select {
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    padding: 0.2rem 0.4rem;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background: var(--color-bg);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+    min-width: 55px;
+  }
+
+  .speed-select:hover,
+  .speed-select:focus {
+    border-color: var(--color-accent);
+    outline: none;
   }
 
   .scroll-toggle {
     display: flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 0.35rem;
     cursor: pointer;
     font-family: var(--font-sans);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--color-muted);
-    margin-left: 0.5rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 4px;
+    transition: all 0.15s ease;
+    margin-left: auto;
+  }
+
+  .scroll-toggle:hover {
+    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
+    color: var(--color-text);
   }
 
   .scroll-toggle input {
-    cursor: pointer;
-    accent-color: var(--color-accent);
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .scroll-icon {
+    color: var(--color-muted);
+    transition: color 0.15s ease;
+  }
+
+  .scroll-toggle input:checked ~ .scroll-icon {
+    color: var(--color-accent);
   }
 
   .scroll-label {
     user-select: none;
+    font-weight: 500;
   }
 
-  .speed-select {
-    font-family: var(--font-sans);
-    font-size: 0.8rem;
-    padding: 0.2rem 0.4rem;
-    border: 1px solid var(--color-border);
-    border-radius: 3px;
-    background: var(--color-bg);
+  .scroll-toggle input:checked ~ .scroll-label {
     color: var(--color-text);
-    cursor: pointer;
-    margin-left: 0.5rem;
   }
 
-  .speed-select:hover {
-    border-color: var(--color-accent);
-  }
-
-  .speed-select:focus {
-    outline: none;
-    border-color: var(--color-accent);
-  }
-
-  .voice-selector {
+  .voice-row {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    margin-left: auto;
+    padding: 0.6rem 1rem;
+    background: color-mix(in srgb, var(--color-bg) 50%, transparent);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .voice-icon {
+    color: var(--color-muted);
+    flex-shrink: 0;
   }
 
   .voice-label {
     font-family: var(--font-sans);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--color-muted);
+    font-weight: 500;
   }
 
   .voice-select {
@@ -523,13 +851,16 @@
     border-radius: 4px;
     background: var(--color-bg);
     color: var(--color-text);
-    max-width: 200px;
+    flex: 1;
+    max-width: 280px;
     cursor: pointer;
+    transition: border-color 0.15s ease;
   }
 
+  .voice-select:hover,
   .voice-select:focus {
-    outline: none;
     border-color: var(--color-accent);
+    outline: none;
   }
 
   /* Highlight currently reading verse */
@@ -545,18 +876,35 @@
 
   @media (max-width: 600px) {
     .narration-controls {
+      gap: 0.5rem;
+    }
+
+    .narration-divider {
+      display: none;
+    }
+
+    .scroll-toggle {
+      margin-left: 0;
+    }
+
+    .verse-selector,
+    .speed-selector {
+      flex-direction: row;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .control-label {
+      font-size: 0.7rem;
+    }
+
+    .voice-row {
       flex-wrap: wrap;
     }
 
-    .voice-selector {
-      width: 100%;
-      margin-left: 0;
-      margin-top: 0.5rem;
-    }
-
     .voice-select {
-      flex: 1;
       max-width: none;
+      width: 100%;
     }
   }
 </style>

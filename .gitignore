@@ -3,6 +3,7 @@ node_modules/
 *.log
 output/
 site/src/data/bible.json
+site/public/audio/
 .env
 .playwright-mcp
 CLAUDE.md

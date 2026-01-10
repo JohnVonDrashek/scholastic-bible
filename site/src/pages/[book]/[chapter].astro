@@ -53,6 +53,12 @@ const bgImagePath = `images/books/${book.id}-bg.png`;
 const fullBgImagePath = path.join(process.cwd(), 'public', bgImagePath);
 const hasParallaxBg = fs.existsSync(fullBgImagePath);
 
+// Check if pre-recorded audio exists for this chapter
+const audioPath = `audio/${book.id}/${chapterNum}.mp3`;
+const fullAudioPath = path.join(process.cwd(), 'public', audioPath);
+const hasAudio = fs.existsSync(fullAudioPath);
+const audioSrc = hasAudio ? `${import.meta.env.BASE_URL}${audioPath}` : undefined;
+
 // Navigation links
 const prevLink = chapterNum > 1
   ? { href: `${base}${book.id}/${chapterNum - 1}/`, label: `Chapter ${chapterNum - 1}` }
@@ -99,7 +105,7 @@ const nextLink = chapterNum < totalChapters
     <p class="chapter-summary">{chapterData.summary}</p>
   )}
 
-  <Narration />
+  <Narration audioSrc={audioSrc} />
 
   <div class:list={["verses", { "psalm-verses": isPsalm }]}>
     {chapterData.verses.map((verse, index) => (

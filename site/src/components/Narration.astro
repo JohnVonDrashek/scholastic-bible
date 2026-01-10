@@ -2,15 +2,28 @@
 // Audio narration component for chapter pages
 // Supports pre-recorded audio (primary) or Web Speech API TTS (fallback)
 
-interface Props {
-  audioSrc?: string; // Path to pre-recorded MP3, e.g., "/audio/genesis/1.mp3"
+interface VerseTiming {
+  verse: number;
+  start: number;
+  end: number;
 }
 
-const { audioSrc } = Astro.props;
+interface Props {
+  audioSrc?: string; // Path to pre-recorded MP3, e.g., "/audio/genesis/1.mp3"
+  timingData?: VerseTiming[]; // Verse timing data for auto-scroll
+}
+
+const { audioSrc, timingData } = Astro.props;
 const hasAudio = !!audioSrc;
+const hasTimingData = timingData && timingData.length > 0;
 ---
 
-<div class="narration-bar" data-mode={hasAudio ? 'audio' : 'tts'} data-audio-src={audioSrc || ''}>
+<div
+  class="narration-bar"
+  data-mode={hasAudio ? 'audio' : 'tts'}
+  data-audio-src={audioSrc || ''}
+  data-timing={hasTimingData ? JSON.stringify(timingData) : ''}
+>
   <div class="narration-header">
     <svg class="narration-icon" viewBox="0 0 24 24" width="18" height="18">
       <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
@@ -60,6 +73,16 @@ const hasAudio = !!audioSrc;
           <option value="2">2x</option>
         </select>
       </div>
+
+      {hasTimingData && (
+        <label class="scroll-toggle" title="Auto-scroll to current verse">
+          <input type="checkbox" id="auto-scroll" checked />
+          <svg class="scroll-icon" viewBox="0 0 24 24" width="16" height="16">
+            <path fill="currentColor" d="M12 5.83L15.17 9l1.41-1.41L12 3 7.41 7.59 8.83 9 12 5.83zm0 12.34L8.83 15l-1.41 1.41L12 21l4.59-4.59L15.17 15 12 18.17z"/>
+          </svg>
+          <span class="scroll-label">Follow</span>
+        </label>
+      )}
     </div>
 
     <!-- Hidden audio element -->
@@ -150,6 +173,7 @@ const hasAudio = !!audioSrc;
    * Pre-recorded audio mode
    */
   function setupAudioMode() {
+    const narrationBar = document.querySelector('.narration-bar') as HTMLElement;
     const audio = document.getElementById('audio-player') as HTMLAudioElement;
     const btn = document.getElementById('narration-btn') as HTMLButtonElement;
     const stopBtn = document.getElementById('narration-stop') as HTMLButtonElement;
@@ -158,6 +182,7 @@ const hasAudio = !!audioSrc;
     const timeTotal = document.getElementById('time-total') as HTMLSpanElement;
     const speedSelect = document.getElementById('speed-select') as HTMLSelectElement;
     const statusEl = document.getElementById('narration-status') as HTMLSpanElement;
+    const autoScrollCheckbox = document.getElementById('auto-scroll') as HTMLInputElement;
 
     if (!audio || !btn) return;
 
@@ -165,6 +190,134 @@ const hasAudio = !!audioSrc;
     const iconPause = btn.querySelector('.icon-pause') as SVGElement;
 
     const SPEED_STORAGE_KEY = 'scholastic-bible-audio-speed';
+    const SCROLL_STORAGE_KEY = 'scholastic-bible-autoscroll';
+
+    // Parse timing data
+    interface VerseTiming { verse: number; start: number; end: number; }
+    let timingData: VerseTiming[] = [];
+    try {
+      const timingStr = narrationBar?.dataset.timing;
+      if (timingStr) {
+        timingData = JSON.parse(timingStr);
+      }
+    } catch (e) {
+      console.warn('Failed to parse timing data:', e);
+    }
+
+    let currentVerseIndex = -1;
+
+    // Load auto-scroll preference
+    if (autoScrollCheckbox) {
+      const savedScroll = localStorage.getItem(SCROLL_STORAGE_KEY);
+      if (savedScroll !== null) {
+        autoScrollCheckbox.checked = savedScroll === 'true';
+      }
+      autoScrollCheckbox.addEventListener('change', () => {
+        localStorage.setItem(SCROLL_STORAGE_KEY, String(autoScrollCheckbox.checked));
+      });
+    }
+
+    // Find verse element by number
+    function getVerseElement(verseNum: number): Element | null {
+      // Try to find verse by data attribute or verse number
+      const verseEls = document.querySelectorAll('.verse');
+      for (const el of verseEls) {
+        const numEl = el.querySelector('.verse-number');
+        const dropCap = el.querySelector('.drop-cap');
+        if (numEl && numEl.textContent?.trim() === String(verseNum)) {
+          return el;
+        }
+        // Verse 1 often has drop cap instead of number
+        if (verseNum === 1 && dropCap && !numEl) {
+          return el;
+        }
+      }
+      return null;
+    }
+
+    // Smooth scroll with easing
+    function smoothScrollTo(element: Element, duration: number = 600) {
+      const targetRect = element.getBoundingClientRect();
+      const targetY = targetRect.top + window.scrollY - (window.innerHeight / 2) + (targetRect.height / 2);
+      const startY = window.scrollY;
+      const distance = targetY - startY;
+      const startTime = performance.now();
+
+      // Ease-out cubic for smooth deceleration
+      function easeOutCubic(t: number): number {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function scroll(currentTime: number) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(progress);
+
+        window.scrollTo(0, startY + distance * eased);
+
+        if (progress < 1) {
+          requestAnimationFrame(scroll);
+        }
+      }
+
+      requestAnimationFrame(scroll);
+    }
+
+    // Highlight and scroll to verse
+    function highlightVerse(verseNum: number) {
+      // Move current reading to was-reading for fade-out effect
+      document.querySelectorAll('.verse.reading').forEach(el => {
+        el.classList.remove('reading');
+        el.classList.add('was-reading');
+        // Remove was-reading after transition completes
+        setTimeout(() => el.classList.remove('was-reading'), 400);
+      });
+
+      // Remove any lingering was-reading classes
+      document.querySelectorAll('.verse.was-reading').forEach(el => {
+        el.classList.remove('was-reading');
+      });
+
+      const verseEl = getVerseElement(verseNum);
+      if (verseEl) {
+        verseEl.classList.add('reading');
+        if (autoScrollCheckbox?.checked) {
+          smoothScrollTo(verseEl, 600);
+        }
+      }
+    }
+
+    // Find current verse based on audio time
+    function updateCurrentVerse(currentTime: number) {
+      if (timingData.length === 0) return;
+
+      // Find the verse that contains the current time
+      for (let i = 0; i < timingData.length; i++) {
+        const timing = timingData[i];
+        if (currentTime >= timing.start && currentTime < timing.end) {
+          if (i !== currentVerseIndex) {
+            currentVerseIndex = i;
+            highlightVerse(timing.verse);
+          }
+          return;
+        }
+      }
+
+      // Check if we're past the last verse
+      const lastTiming = timingData[timingData.length - 1];
+      if (currentTime >= lastTiming.end) {
+        if (currentVerseIndex !== timingData.length - 1) {
+          currentVerseIndex = timingData.length - 1;
+          highlightVerse(lastTiming.verse);
+        }
+      }
+    }
+
+    // Clear verse highlighting
+    function clearHighlighting() {
+      currentVerseIndex = -1;
+      document.querySelectorAll('.verse.reading').forEach(el => el.classList.remove('reading'));
+    }
 
     // Load speed preference
     const savedSpeed = localStorage.getItem(SPEED_STORAGE_KEY);
@@ -201,23 +354,36 @@ const hasAudio = !!audioSrc;
       }
     }
 
-    // Audio events
-    audio.addEventListener('loadedmetadata', () => {
-      timeTotal.textContent = formatTime(audio.duration);
-      progressBar.max = String(Math.floor(audio.duration));
-    });
+    // Update duration display when available
+    function updateDuration() {
+      const duration = audio.duration;
+      if (duration && isFinite(duration) && duration > 0) {
+        timeTotal.textContent = formatTime(duration);
+        progressBar.max = String(Math.floor(duration));
+      }
+    }
+
+    // Audio events - try multiple events since MP3 metadata can be tricky
+    audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('durationchange', updateDuration);
+    audio.addEventListener('canplay', updateDuration);
+
+    // Also check immediately in case already loaded
+    if (audio.readyState >= 1) {
+      updateDuration();
+    }
 
     audio.addEventListener('timeupdate', () => {
       timeCurrent.textContent = formatTime(audio.currentTime);
       progressBar.value = String(Math.floor(audio.currentTime));
+      // Update verse highlighting based on current time
+      if (timingData.length > 0 && !audio.paused) {
+        updateCurrentVerse(audio.currentTime);
+      }
     });
 
     audio.addEventListener('play', updateUI);
     audio.addEventListener('pause', updateUI);
-    audio.addEventListener('ended', () => {
-      audio.currentTime = 0;
-      updateUI();
-    });
 
     // Clone buttons to remove old event listeners
     const newBtn = btn.cloneNode(true) as HTMLButtonElement;
@@ -263,6 +429,7 @@ const hasAudio = !!audioSrc;
     newStopBtn.addEventListener('click', () => {
       audio.pause();
       audio.currentTime = 0;
+      clearHighlighting();
       updateUIActive();
     });
 
@@ -277,11 +444,53 @@ const hasAudio = !!audioSrc;
       localStorage.setItem(SPEED_STORAGE_KEY, speedSelect.value);
     });
 
+    // When audio finishes, reset to ready state
+    audio.addEventListener('ended', () => {
+      audio.currentTime = 0;
+      clearHighlighting();
+      updateUIActive();
+    });
+
     // Clean up on page navigation
     document.addEventListener('astro:before-preparation', () => {
       audio.pause();
       audio.currentTime = 0;
+      clearHighlighting();
     });
+
+    // Force reload audio to ensure metadata is loaded (helps with View Transitions)
+    audio.load();
+
+    // Global spacebar handler for play/pause
+    function handleKeydown(e: KeyboardEvent) {
+      // Only handle spacebar
+      if (e.code !== 'Space') return;
+
+      // Don't interfere with input fields
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+        return;
+      }
+
+      // Prevent default scroll behavior
+      e.preventDefault();
+
+      // Toggle play/pause
+      if (audio.paused) {
+        audio.play();
+      } else {
+        audio.pause();
+      }
+      updateUIActive();
+    }
+
+    // Add listener
+    document.addEventListener('keydown', handleKeydown);
+
+    // Clean up listener on navigation
+    document.addEventListener('astro:before-preparation', () => {
+      document.removeEventListener('keydown', handleKeydown);
+    }, { once: true });
   }
 
   /**
@@ -467,12 +676,48 @@ const hasAudio = !!audioSrc;
       }
     }
 
+    // Smooth scroll with easing
+    function smoothScrollTo(element: Element, duration: number = 600) {
+      const targetRect = element.getBoundingClientRect();
+      const targetY = targetRect.top + window.scrollY - (window.innerHeight / 2) + (targetRect.height / 2);
+      const startY = window.scrollY;
+      const distance = targetY - startY;
+      const startTime = performance.now();
+
+      function easeOutCubic(t: number): number {
+        return 1 - Math.pow(1 - t, 3);
+      }
+
+      function scroll(currentTime: number) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(progress);
+        window.scrollTo(0, startY + distance * eased);
+        if (progress < 1) {
+          requestAnimationFrame(scroll);
+        }
+      }
+
+      requestAnimationFrame(scroll);
+    }
+
     function highlightVerse(index: number) {
-      document.querySelectorAll('.verse.reading').forEach(el => el.classList.remove('reading'));
+      // Move current reading to was-reading for fade-out effect
+      document.querySelectorAll('.verse.reading').forEach(el => {
+        el.classList.remove('reading');
+        el.classList.add('was-reading');
+        setTimeout(() => el.classList.remove('was-reading'), 400);
+      });
+
+      // Remove any lingering was-reading classes
+      document.querySelectorAll('.verse.was-reading').forEach(el => {
+        el.classList.remove('was-reading');
+      });
+
       if (verses[index]) {
         verses[index].element.classList.add('reading');
         if (autoScrollCheckbox?.checked) {
-          verses[index].element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          smoothScrollTo(verses[index].element, 600);
         }
       }
     }
@@ -640,6 +885,29 @@ const hasAudio = !!audioSrc;
 
     gatherVerses();
     document.addEventListener('astro:before-preparation', stopActive);
+
+    // Global spacebar handler for play/pause
+    function handleKeydown(e: KeyboardEvent) {
+      if (e.code !== 'Space') return;
+
+      const target = e.target as HTMLElement;
+      if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.tagName === 'SELECT') {
+        return;
+      }
+
+      e.preventDefault();
+
+      if (isPlaying && !isPaused) {
+        pauseActive();
+      } else {
+        playActive();
+      }
+    }
+
+    document.addEventListener('keydown', handleKeydown);
+    document.addEventListener('astro:before-preparation', () => {
+      document.removeEventListener('keydown', handleKeydown);
+    }, { once: true });
   }
 
   // Run on initial load and after View Transitions navigation
@@ -1003,15 +1271,30 @@ const hasAudio = !!audioSrc;
     display: none;
   }
 
-  /* Highlight currently reading verse (TTS mode) */
-  :global(.verse.reading) {
-    background: var(--color-highlight) !important;
-    border-left: 3px solid var(--color-accent);
-    padding-left: calc(0.5rem - 3px);
+  /* Smooth transitions for verse highlighting */
+  :global(.verse) {
+    transition: background-color 0.4s ease,
+                border-left-color 0.4s ease,
+                box-shadow 0.4s ease;
+    border-left: 3px solid transparent;
     margin-left: -0.5rem;
+    padding-left: calc(0.5rem - 3px);
     padding-right: 0.5rem;
     margin-right: -0.5rem;
     border-radius: 3px;
+  }
+
+  /* Highlight currently reading verse */
+  :global(.verse.reading) {
+    background: var(--color-highlight) !important;
+    border-left-color: var(--color-accent);
+    box-shadow: 0 2px 8px rgba(139, 69, 19, 0.1);
+  }
+
+  /* Fade out effect for verse that was just read */
+  :global(.verse.was-reading) {
+    background: color-mix(in srgb, var(--color-highlight) 30%, transparent);
+    border-left-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
   }
 
   @media (max-width: 600px) {

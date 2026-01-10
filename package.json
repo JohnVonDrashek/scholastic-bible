@@ -10,10 +10,11 @@
     "test": "node bin/bible.js vulgate Genesis 1 1",
     "generate": "node lib/generator.js",
     "generate:image": "node lib/generate-image.js",
+    "generate:search": "node scripts/generate-search-index.js",
     "site:install": "cd site && npm install",
     "site:dev": "cd site && npm run dev",
     "site:build": "cd site && npm run build",
-    "build": "npm run generate && npm run site:build"
+    "build": "npm run generate && npm run generate:search && npm run site:build"
   },
   "keywords": [
     "bible",

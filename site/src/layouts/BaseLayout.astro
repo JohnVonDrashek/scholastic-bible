@@ -89,14 +89,8 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
       .page {
         max-width: 900px;
         margin: 0 auto;
-        background: var(--color-bg);
         min-height: 100vh;
-        box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
         view-transition-name: page-container;
-      }
-
-      [data-theme="dark"] .page {
-        box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
       }
 
       header {

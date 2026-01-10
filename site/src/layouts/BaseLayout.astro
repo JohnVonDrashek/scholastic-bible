@@ -1,17 +1,15 @@
 ---
 import { ViewTransitions } from 'astro:transitions';
-import { getBookPattern, getBookPatternDark, getDefaultPattern, getDefaultPatternDark } from '../lib/bookPatterns';
 import { getBookBackground, getBookColor } from '../lib/colorPalette';
 
 interface Props {
   title: string;
   bookId?: string;
+  parallaxBg?: string;
 }
 
-const { title, bookId } = Astro.props;
+const { title, bookId, parallaxBg } = Astro.props;
 const base = import.meta.env.BASE_URL;
-const backgroundPattern = bookId ? getBookPattern(bookId) : getDefaultPattern();
-const backgroundPatternDark = bookId ? getBookPatternDark(bookId) : getDefaultPatternDark();
 const backgroundColor = bookId ? getBookBackground(bookId) : '#faf9f7';
 const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
 ---
@@ -86,8 +84,6 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
         line-height: 1.75;
         color: var(--color-text);
         background-color: var(--book-bg, var(--color-bg));
-        background-image: var(--book-pattern, none);
-        background-attachment: fixed;
       }
 
       .page {
@@ -96,6 +92,7 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
         background: var(--color-bg);
         min-height: 100vh;
         box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+        view-transition-name: page-container;
       }
 
       [data-theme="dark"] .page {
@@ -108,6 +105,7 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
         background: transparent;
         position: relative;
         z-index: 1;
+        view-transition-name: site-header;
       }
 
       header nav {
@@ -204,6 +202,7 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
         color: var(--color-muted);
         font-size: 0.875rem;
         font-style: italic;
+        view-transition-name: site-footer;
       }
 
       .theme-toggle {
@@ -243,7 +242,6 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
 
       [data-theme="dark"] body {
         background-color: #0d0d0d;
-        background-image: var(--book-pattern-dark, none);
       }
 
       /* Animate only the main content area */
@@ -254,60 +252,135 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
 
     <!-- View Transition animations must be global (not scoped) -->
     <style is:global>
-      /* View Transitions - TESTING with obvious animation */
-      @keyframes slide-out {
-        from {
-          opacity: 1;
-          transform: translateX(0) scale(1);
-          background: yellow;
-        }
-        to {
-          opacity: 0;
-          transform: translateX(-200px) scale(0.8);
-          background: red;
-        }
-      }
+      /*
+       * View Transition Strategy:
+       * - root: disabled (no full-page flash)
+       * - site-header: persists without animation (identical across pages)
+       * - site-footer: persists without animation (identical across pages)
+       * - page-container: persists without animation (structural element)
+       * - main-content: crossfades (content changes between pages)
+       * - parallax-bg: crossfades when image changes, persists when same
+       * - parallax-overlay: crossfades with background
+       */
 
-      @keyframes slide-in {
-        from {
-          opacity: 0;
-          transform: translateX(200px) scale(0.8);
-          background: blue;
-        }
-        to {
-          opacity: 1;
-          transform: translateX(0) scale(1);
-          background: transparent;
-        }
-      }
-
-      /* Disable root transition - we'll animate only main content */
+      /* Disable root transition to prevent full-page flash */
       ::view-transition-old(root),
       ::view-transition-new(root) {
         animation: none;
       }
 
-      /* Both animations run simultaneously - LONG DURATION FOR TESTING */
+      /* Header persists without animation - it's identical across pages */
+      ::view-transition-old(site-header),
+      ::view-transition-new(site-header) {
+        animation: none;
+      }
+
+      /* Footer persists without animation - it's identical across pages */
+      ::view-transition-old(site-footer),
+      ::view-transition-new(site-footer) {
+        animation: none;
+      }
+
+      /* Page container persists without animation */
+      ::view-transition-old(page-container),
+      ::view-transition-new(page-container) {
+        animation: none;
+      }
+
+      /* Main content crossfades - this is where the actual content changes */
       ::view-transition-old(main-content) {
-        animation: slide-out 1.5s ease-in-out both;
+        animation: vt-fade-out 0.2s ease-out both;
       }
 
       ::view-transition-new(main-content) {
-        animation: slide-in 1.5s ease-in-out both;
+        animation: vt-fade-in 0.2s ease-out both;
       }
 
-      /* Stack old and new during transition for proper crossfade */
-      ::view-transition-image-pair(main-content) {
-        isolation: isolate;
+      /* Parallax background crossfades properly: old fades OUT, new fades IN */
+      ::view-transition-old(parallax-bg) {
+        animation: vt-fade-out 0.25s ease-out both;
       }
 
-      ::view-transition-old(main-content),
-      ::view-transition-new(main-content) {
-        mix-blend-mode: normal;
+      ::view-transition-new(parallax-bg) {
+        animation: vt-fade-in 0.25s ease-out both;
+      }
+
+      /* Parallax overlay crossfades with background */
+      ::view-transition-old(parallax-overlay) {
+        animation: vt-fade-out 0.25s ease-out both;
+      }
+
+      ::view-transition-new(parallax-overlay) {
+        animation: vt-fade-in 0.25s ease-out both;
+      }
+
+      /* Animation keyframes */
+      @keyframes vt-fade-out {
+        from { opacity: 1; }
+        to { opacity: 0; }
+      }
+
+      @keyframes vt-fade-in {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      /* Parallax background styles */
+      .parallax-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-size: 115% auto;
+        background-position: center top;
+        background-repeat: no-repeat;
+        z-index: -2;
+        will-change: transform;
+        pointer-events: none;
+        view-transition-name: parallax-bg;
+      }
+
+      .parallax-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          to bottom,
+          rgba(250, 249, 247, 0.3) 0%,
+          rgba(250, 249, 247, 0.7) 30%,
+          rgba(250, 249, 247, 0.85) 60%,
+          rgba(250, 249, 247, 0.95) 100%
+        );
+        z-index: -1;
+        pointer-events: none;
+        view-transition-name: parallax-overlay;
+      }
+
+      [data-theme="dark"] .parallax-overlay {
+        background: linear-gradient(
+          to bottom,
+          rgba(26, 26, 26, 0.4) 0%,
+          rgba(26, 26, 26, 0.75) 30%,
+          rgba(26, 26, 26, 0.9) 60%,
+          rgba(26, 26, 26, 0.97) 100%
+        );
+      }
+
+      [data-theme="dark"] .parallax-bg {
+        filter: brightness(0.4) sepia(0.4);
       }
     </style>
   </head>
-  <body style={`--book-pattern: ${backgroundPattern}; --book-pattern-dark: ${backgroundPatternDark}; --book-bg: ${backgroundColor}; --book-color: ${bookColor}`}>
+  <body style={`--book-bg: ${backgroundColor}; --book-color: ${bookColor}`}>
+    {parallaxBg && (
+      <>
+        <div class="parallax-bg" id="parallax-bg" style={`background-image: url('${parallaxBg}')`}></div>
+        <div class="parallax-overlay"></div>
+      </>
+    )}
     <div class="page">
       <header>
         <nav>
@@ -368,6 +441,45 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
           }
         }
       });
+    </script>
+    <script>
+      function setupParallax() {
+        const bg = document.getElementById('parallax-bg');
+        if (!bg) return;
+
+        let ticking = false;
+
+        function updateParallax() {
+          const scrollY = window.scrollY;
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const scrollProgress = docHeight > 0 ? scrollY / docHeight : 0;
+
+          const viewportWidth = window.innerWidth;
+          const viewportHeight = window.innerHeight;
+          const imageHeight = viewportWidth * 1.15 * (16 / 9);
+
+          const topOffset = viewportWidth * 0.075 * (16 / 9);
+          const extraHeight = Math.max(0, imageHeight - viewportHeight - topOffset);
+
+          const yPos = -topOffset - (scrollProgress * extraHeight);
+
+          bg.style.backgroundPosition = `center ${yPos}px`;
+          ticking = false;
+        }
+
+        function onScroll() {
+          if (!ticking) {
+            requestAnimationFrame(updateParallax);
+            ticking = true;
+          }
+        }
+
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', updateParallax, { passive: true });
+        updateParallax();
+      }
+
+      document.addEventListener('astro:page-load', setupParallax);
     </script>
   </body>
 </html>

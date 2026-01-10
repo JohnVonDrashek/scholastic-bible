@@ -5,3 +5,4 @@ output/
 site/src/data/bible.json
 .env
 .playwright-mcp
+CLAUDE.md

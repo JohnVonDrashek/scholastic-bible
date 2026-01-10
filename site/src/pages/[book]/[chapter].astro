@@ -63,13 +63,7 @@ const nextLink = chapterNum < totalChapters
   : undefined;
 ---
 
-<BaseLayout title={`${book.name} ${chapterNum}`} bookId={book.id}>
-  {hasParallaxBg && (
-    <>
-      <div class="parallax-bg" id="parallax-bg" style={`background-image: url('${import.meta.env.BASE_URL}${bgImagePath}')`}></div>
-      <div class="parallax-overlay"></div>
-    </>
-  )}
+<BaseLayout title={`${book.name} ${chapterNum}`} bookId={book.id} parallaxBg={hasParallaxBg ? `${import.meta.env.BASE_URL}${bgImagePath}` : undefined}>
   <Fragment slot="breadcrumb">
     <span class="breadcrumb">
       <span>/</span>
@@ -208,54 +202,6 @@ const nextLink = chapterNum < totalChapters
   .version-label {
     pointer-events: none;
   }
-
-  /* Parallax background styles */
-  .parallax-bg {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-size: 115% auto;
-    background-position: center top;
-    background-repeat: no-repeat;
-    z-index: -2;
-    will-change: transform;
-    pointer-events: none;
-    view-transition-name: parallax-bg;
-  }
-
-  .parallax-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    view-transition-name: parallax-overlay;
-    background: linear-gradient(
-      to bottom,
-      rgba(250, 249, 247, 0.3) 0%,
-      rgba(250, 249, 247, 0.7) 30%,
-      rgba(250, 249, 247, 0.85) 60%,
-      rgba(250, 249, 247, 0.95) 100%
-    );
-    z-index: -1;
-    pointer-events: none;
-  }
-
-  :global([data-theme="dark"]) .parallax-overlay {
-    background: linear-gradient(
-      to bottom,
-      rgba(26, 26, 26, 0.4) 0%,
-      rgba(26, 26, 26, 0.75) 30%,
-      rgba(26, 26, 26, 0.9) 60%,
-      rgba(26, 26, 26, 0.97) 100%
-    );
-  }
-
-  :global([data-theme="dark"]) .parallax-bg {
-    filter: brightness(0.4) sepia(0.4);
-  }
 </style>
 
 <script>
@@ -294,49 +240,4 @@ const nextLink = chapterNum < totalChapters
       localStorage.setItem(`img-version-${pageKey}`, currentVersion);
     });
   });
-</script>
-
-<script>
-  function setupParallax() {
-    const bg = document.getElementById('parallax-bg');
-    if (!bg) return;
-
-    let ticking = false;
-
-    function updateParallax() {
-      const scrollY = window.scrollY;
-      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-      const scrollProgress = docHeight > 0 ? scrollY / docHeight : 0;
-
-      // 9:16 image at 115% width means height = width * 1.15 * (16/9)
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      const imageHeight = viewportWidth * 1.15 * (16 / 9); // 9:16 aspect ratio at 115% zoom
-
-      // Extra width on each side from 115% zoom = 7.5% of viewport width on each side
-      // Start with a negative offset to hide the top edge (proportional to the zoom)
-      const topOffset = viewportWidth * 0.075 * (16 / 9); // Hide top edge
-      const extraHeight = Math.max(0, imageHeight - viewportHeight - topOffset);
-
-      // As user scrolls 0->100%, background shifts from -topOffset to -(topOffset + extraHeight)
-      const yPos = -topOffset - (scrollProgress * extraHeight);
-
-      bg.style.backgroundPosition = `center ${yPos}px`;
-      ticking = false;
-    }
-
-    function onScroll() {
-      if (!ticking) {
-        requestAnimationFrame(updateParallax);
-        ticking = true;
-      }
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', updateParallax, { passive: true });
-    updateParallax(); // Initial position
-  }
-
-  // Run on initial load and after View Transitions
-  document.addEventListener('astro:page-load', setupParallax);
 </script>

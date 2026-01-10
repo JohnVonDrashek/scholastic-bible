@@ -1,14 +1,22 @@
 ---
+interface ChallonorAnnotation {
+  lemma: string;
+  text: string;
+}
+
 interface Props {
   number: number;
   text: string;
   patched?: boolean;
+  challoner?: ChallonorAnnotation[];
   footnotes?: string[];
   isFirst?: boolean;
 }
 
-const { number, text, patched = false, footnotes = [], isFirst = false } = Astro.props;
+const { number, text, patched = false, challoner = [], footnotes = [], isFirst = false } = Astro.props;
+const hasChalloner = challoner.length > 0;
 const hasFootnotes = footnotes.length > 0;
+const hasAnnotations = hasChalloner || hasFootnotes;
 
 // For drop cap: extract first letter and rest of text
 const firstLetter = isFirst ? text.charAt(0) : '';
@@ -27,13 +35,19 @@ const restOfText = isFirst ? text.slice(1) : text;
       <span class="verse-text">{text}</span>
     </>
   )}
-  {hasFootnotes && (
+  {hasAnnotations && (
     <sup class="footnote-marker" data-verse={number}>*</sup>
   )}
 </div>
 
-{hasFootnotes && (
+{hasAnnotations && (
   <div class="footnotes" id={`fn${number}`}>
+    {challoner.map((note, i) => (
+      <p class="footnote challoner-note">
+        <span class="footnote-ref challoner-ref">{number}.{i + 1} C</span>
+        <em class="challoner-lemma">{note.lemma}</em> — {note.text}
+      </p>
+    ))}
     {footnotes.map((note, i) => (
       <p class="footnote">
         <span class="footnote-ref">{number}.{i + 1}</span> {note}
@@ -106,5 +120,13 @@ const restOfText = isFirst ? text.slice(1) : text;
   .footnote-ref {
     font-weight: bold;
     color: var(--color-accent);
+  }
+
+  .challoner-ref {
+    color: var(--color-muted);
+  }
+
+  .challoner-lemma {
+    font-style: italic;
   }
 </style>

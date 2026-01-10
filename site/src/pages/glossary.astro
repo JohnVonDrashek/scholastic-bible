@@ -1,0 +1,143 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import bible from '../data/bible.json';
+
+const { glossary } = bible.supplementary;
+const base = import.meta.env.BASE_URL;
+
+// Group terms by first letter
+const groupedTerms = glossary.reduce((acc, entry) => {
+  const letter = entry.term.charAt(0).toUpperCase();
+  if (!acc[letter]) acc[letter] = [];
+  acc[letter].push(entry);
+  return acc;
+}, {} as Record<string, typeof glossary>);
+
+const letters = Object.keys(groupedTerms).sort();
+---
+
+<BaseLayout title="Glossary">
+  <Fragment slot="breadcrumb">
+    <span>›</span>
+    <span>Glossary</span>
+  </Fragment>
+
+  <h1>Hard Vvordes Explicated</h1>
+  <p class="intro">
+    The explication of certaine vvordes in this translation, not familiar to the vulgar reader,
+    vvhich might not conueniently be vttered otherwise.
+  </p>
+
+  <nav class="letter-nav">
+    {letters.map(letter => (
+      <a href={`#${letter}`}>{letter}</a>
+    ))}
+  </nav>
+
+  <div class="glossary">
+    {letters.map(letter => (
+      <section id={letter}>
+        <h2>{letter}</h2>
+        <dl>
+          {groupedTerms[letter].map(entry => (
+            <div class="term-entry">
+              <dt>{entry.term}</dt>
+              <dd>
+                {entry.definition}
+                {entry.references.length > 0 && (
+                  <span class="references">
+                    [{entry.references.join(', ')}]
+                  </span>
+                )}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+    ))}
+  </div>
+</BaseLayout>
+
+<style>
+  .intro {
+    font-style: italic;
+    color: var(--color-muted);
+    margin-bottom: 2rem;
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1rem;
+  }
+
+  .letter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: color-mix(in srgb, var(--color-accent) 5%, var(--color-bg));
+    border-radius: 8px;
+  }
+
+  .letter-nav a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    text-decoration: none;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+
+  .letter-nav a:hover {
+    background: var(--color-accent);
+    color: white;
+    border-color: var(--color-accent);
+  }
+
+  .glossary section {
+    margin-bottom: 2rem;
+  }
+
+  .glossary h2 {
+    font-size: 1.75rem;
+    color: var(--color-accent);
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  dl {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .term-entry {
+    padding-left: 1rem;
+    border-left: 2px solid var(--color-border);
+  }
+
+  dt {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--color-text);
+    margin-bottom: 0.25rem;
+  }
+
+  dd {
+    color: var(--color-text);
+    line-height: 1.7;
+  }
+
+  .references {
+    display: inline;
+    color: var(--color-muted);
+    font-size: 0.9rem;
+    margin-left: 0.5rem;
+  }
+</style>

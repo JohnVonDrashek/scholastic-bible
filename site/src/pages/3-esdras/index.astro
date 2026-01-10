@@ -1,0 +1,95 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ChapterList from '../../components/ChapterList.astro';
+import bible from '../../data/bible.json';
+
+const { esdras3 } = bible.supplementary;
+const base = import.meta.env.BASE_URL;
+
+// Format chapters for ChapterList component
+const chapters = esdras3.chapters.map(ch => ({
+  number: ch.number,
+  editCount: 0,
+  footnoteCount: 0,
+  challonerCount: 0,
+  hasIllustration: false
+}));
+---
+
+<BaseLayout title="3 Esdras" bookId="3-esdras">
+  <Fragment slot="breadcrumb">
+    <span class="breadcrumb">
+      <span>/</span>
+      <span>3 Esdras</span>
+    </span>
+  </Fragment>
+
+  <h1>{esdras3.title}</h1>
+
+  <div class="book-intro">
+    <p>
+      Also known as 1 Esdras in the Septuagint, this apocryphal book parallels
+      portions of 2 Chronicles, Ezra, and Nehemiah with unique additions including
+      the famous Story of the Three Guardsmen.
+    </p>
+  </div>
+
+  <h2 class="chapter-heading">Chapters</h2>
+
+  <ChapterList
+    bookId="3-esdras"
+    bookName="3 Esdras"
+    chapters={chapters}
+  />
+
+  <aside class="about-note">
+    <h3>About This Book</h3>
+    <p>
+      The Third Book of Esdras is found in the Appendix to the Vulgate. While not
+      considered canonical by most Christian traditions, it was included by the
+      Douay-Rheims translators as part of the complete Latin Bible tradition.
+    </p>
+  </aside>
+</BaseLayout>
+
+<style>
+  .book-intro {
+    background: var(--color-patched);
+    border-left: 3px solid var(--color-accent);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+    color: var(--color-muted);
+    line-height: 1.6;
+  }
+
+  .chapter-heading {
+    font-size: 1.25rem;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+  }
+
+  .about-note {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: var(--color-patched);
+    border-radius: 8px;
+  }
+
+  .about-note h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .about-note p {
+    font-size: 0.95rem;
+    color: var(--color-muted);
+    margin: 0;
+  }
+</style>

@@ -8,5 +8,5 @@ export default defineConfig({
     assets: 'assets',
     format: 'directory'
   },
-  trailingSlash: 'always'
+  trailingSlash: 'ignore'
 });

@@ -1,14 +1,22 @@
 ---
+interface ChallonorAnnotation {
+  lemma: string;
+  text: string;
+}
+
 interface Props {
   number: number;
   text: string;
   patched?: boolean;
+  challoner?: ChallonorAnnotation[];
   footnotes?: string[];
   isFirst?: boolean;
 }
 
-const { number, text, patched = false, footnotes = [], isFirst = false } = Astro.props;
+const { number, text, patched = false, challoner = [], footnotes = [], isFirst = false } = Astro.props;
+const hasChalloner = challoner.length > 0;
 const hasFootnotes = footnotes.length > 0;
+const hasAnnotations = hasChalloner || hasFootnotes;
 
 // Split verse at natural flex point for chanting
 // Priority: colon, semicolon, then find a comma near the middle
@@ -89,7 +97,7 @@ const secondHalf = split ? split.second : null;
       </div>
       <div class="psalm-half psalm-second-half">
         <span class="psalm-text">{secondHalf}</span>
-        {hasFootnotes && (
+        {hasAnnotations && (
           <sup class="footnote-marker" data-verse={number}>*</sup>
         )}
       </div>
@@ -107,15 +115,21 @@ const secondHalf = split ? split.second : null;
           <span class="psalm-text">{text}</span>
         </>
       )}
-      {hasFootnotes && (
+      {hasAnnotations && (
         <sup class="footnote-marker" data-verse={number}>*</sup>
       )}
     </div>
   )}
 </div>
 
-{hasFootnotes && (
+{hasAnnotations && (
   <div class="psalm-footnotes" id={`fn${number}`}>
+    {challoner.map((note, i) => (
+      <p class="psalm-footnote challoner-note">
+        <span class="psalm-footnote-ref challoner-ref">{number}.{i + 1} C</span>
+        <em class="challoner-lemma">{note.lemma}</em> — {note.text}
+      </p>
+    ))}
     {footnotes.map((note, i) => (
       <p class="psalm-footnote">
         <span class="psalm-footnote-ref">{number}.{i + 1}</span> {note}
@@ -219,4 +233,11 @@ const secondHalf = split ? split.second : null;
     color: var(--color-accent);
   }
 
+  .challoner-ref {
+    color: var(--color-muted);
+  }
+
+  .challoner-lemma {
+    font-style: italic;
+  }
 </style>

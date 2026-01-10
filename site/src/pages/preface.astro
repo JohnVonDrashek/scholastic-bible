@@ -1,0 +1,68 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import bible from '../data/bible.json';
+
+const { preface } = bible.supplementary;
+
+// Split preface into paragraphs (double newlines)
+const paragraphs = preface.split('\n\n').filter(p => p.trim());
+---
+
+<BaseLayout title="Preface to the Reader">
+  <Fragment slot="breadcrumb">
+    <span>›</span>
+    <span>Preface</span>
+  </Fragment>
+
+  <h1>The Preface to the Reader</h1>
+  <p class="subtitle">From the Original Douay-Rheims Translation</p>
+
+  <article class="preface-content">
+    {paragraphs.map((para, index) => {
+      // First paragraph gets drop cap treatment
+      if (index === 0) {
+        const firstLetter = para.charAt(0);
+        const rest = para.slice(1);
+        return (
+          <p class="first-para">
+            <span class="drop-cap">{firstLetter}</span>{rest}
+          </p>
+        );
+      }
+      return <p>{para}</p>;
+    })}
+  </article>
+</BaseLayout>
+
+<style>
+  .subtitle {
+    font-style: italic;
+    color: var(--color-muted);
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+  }
+
+  .preface-content {
+    max-width: 65ch;
+  }
+
+  .preface-content p {
+    margin-bottom: 1.5rem;
+    text-align: justify;
+    text-indent: 1.5rem;
+  }
+
+  .first-para {
+    text-indent: 0 !important;
+  }
+
+  .drop-cap {
+    float: left;
+    font-family: var(--font-drop-cap);
+    font-size: 4rem;
+    line-height: 0.8;
+    padding-right: 0.5rem;
+    padding-top: 0.1rem;
+    color: var(--color-accent);
+  }
+</style>

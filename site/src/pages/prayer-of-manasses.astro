@@ -1,0 +1,96 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import bible from '../data/bible.json';
+
+const { prayerOfManasses } = bible.supplementary;
+
+// Split into sentences for better formatting
+const sentences = prayerOfManasses.split(/(?<=[.!?])\s+/);
+---
+
+<BaseLayout title="Prayer of Manasses">
+  <Fragment slot="breadcrumb">
+    <span>›</span>
+    <span>Prayer of Manasses</span>
+  </Fragment>
+
+  <h1>The Prayer of Manasses</h1>
+  <p class="subtitle">King of Juda, when he was held captive in Babylon</p>
+
+  <article class="prayer-content">
+    <p class="prayer-text">
+      {sentences.map((sentence, i) => (
+        <Fragment>
+          {i > 0 && ' '}
+          {sentence}
+        </Fragment>
+      ))}
+    </p>
+  </article>
+
+  <aside class="note">
+    <h3>Historical Context</h3>
+    <p>
+      The Prayer of Manasses is a short work of fifteen verses, purporting to be
+      the prayer of repentance uttered by Manasses, King of Judah, after he was
+      taken captive to Babylon. The prayer is referenced in 2 Chronicles 33:12-13,
+      where it is said that Manasses "entreated the Lord his God, and did penance
+      exceedingly before the God of his fathers."
+    </p>
+    <p>
+      This text is included in the Appendix to the Vulgate, following the practice
+      of the Douay-Rheims translators who preserved the full contents of the Latin
+      Bible for English readers.
+    </p>
+  </aside>
+</BaseLayout>
+
+<style>
+  .subtitle {
+    font-style: italic;
+    color: var(--color-muted);
+    margin-top: -1rem;
+    margin-bottom: 2rem;
+  }
+
+  .prayer-content {
+    background: color-mix(in srgb, var(--color-accent) 5%, var(--color-bg));
+    border-left: 4px solid var(--color-accent);
+    padding: 2rem;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 2rem;
+  }
+
+  .prayer-text {
+    font-size: 1.1rem;
+    line-height: 1.9;
+    text-align: justify;
+  }
+
+  .note {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: var(--color-patched);
+    border-radius: 8px;
+  }
+
+  .note h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .note p {
+    font-size: 0.95rem;
+    color: var(--color-muted);
+    margin-bottom: 1rem;
+  }
+
+  .note p:last-child {
+    margin-bottom: 0;
+  }
+</style>

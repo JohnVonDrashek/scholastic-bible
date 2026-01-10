@@ -1,0 +1,74 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Verse from '../../components/Verse.astro';
+import VerseDivider from '../../components/VerseDivider.astro';
+import Navigation from '../../components/Navigation.astro';
+import Narration from '../../components/Narration.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
+import bible from '../../data/bible.json';
+
+export function getStaticPaths() {
+  const { esdras4 } = bible.supplementary;
+  return esdras4.chapters.map(chapter => ({
+    params: { chapter: String(chapter.number) },
+    props: { chapter }
+  }));
+}
+
+const { chapter } = Astro.props;
+const { esdras4 } = bible.supplementary;
+const base = import.meta.env.BASE_URL;
+
+const chapterNum = chapter.number;
+const totalChapters = esdras4.chapters.length;
+
+// Navigation links
+const prevLink = chapterNum > 1
+  ? { href: `${base}4-esdras/${chapterNum - 1}/`, label: `Chapter ${chapterNum - 1}` }
+  : undefined;
+
+const nextLink = chapterNum < totalChapters
+  ? { href: `${base}4-esdras/${chapterNum + 1}/`, label: `Chapter ${chapterNum + 1}` }
+  : undefined;
+---
+
+<BaseLayout title={`4 Esdras ${chapterNum}`} bookId="4-esdras">
+  <Fragment slot="breadcrumb">
+    <span class="breadcrumb">
+      <span>/</span>
+      <a href={`${base}4-esdras/`}>4 Esdras</a>
+      <span>/</span>
+      <span>Chapter {chapterNum}</span>
+    </span>
+  </Fragment>
+
+  <h1>4 Esdras {chapterNum}</h1>
+
+  <Narration />
+
+  <div class="verses">
+    {chapter.verses.map((verse, index) => (
+      <>
+        {index > 0 && index % 5 === 0 && <VerseDivider />}
+        <Verse
+          number={verse.number}
+          text={verse.text}
+          patched={false}
+          challoner={[]}
+          footnotes={[]}
+          isFirst={index === 0}
+        />
+      </>
+    ))}
+  </div>
+
+  <ReadingProgress bookId="4-esdras" chapter={chapterNum} />
+
+  <Navigation prevLink={prevLink} nextLink={nextLink} />
+</BaseLayout>
+
+<style>
+  .verses {
+    margin-top: 1.5rem;
+  }
+</style>

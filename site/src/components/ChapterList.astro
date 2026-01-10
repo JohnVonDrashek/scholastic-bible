@@ -3,6 +3,7 @@ interface Chapter {
   number: number;
   editCount: number;
   footnoteCount: number;
+  challonerCount: number;
   hasIllustration?: boolean;
 }
 
@@ -20,17 +21,18 @@ const base = import.meta.env.BASE_URL;
   {chapters.map((ch) => (
     <a
       href={`${base}${bookId}/${ch.number}/`}
-      class:list={["chapter-link", { "has-edits": ch.editCount > 0, "has-illustration": ch.hasIllustration }]}
+      class:list={["chapter-link", { "has-edits": ch.editCount > 0, "has-challoner": ch.challonerCount > 0, "has-illustration": ch.hasIllustration }]}
       data-chapter={ch.number}
-      title={ch.hasIllustration ? 'Illustrated' : (ch.editCount > 0 ? `${ch.editCount} edits, ${ch.footnoteCount} notes` : '')}
+      title={ch.hasIllustration ? 'Illustrated' : (ch.editCount > 0 || ch.challonerCount > 0 ? `${ch.editCount} edits, ${ch.challonerCount} annotations, ${ch.footnoteCount} notes` : '')}
     >
       {ch.hasIllustration && <span class="illustration-indicator" title="Illustrated"></span>}
       <span class="read-indicator" title="Read">✓</span>
       <span class="chapter-num">{ch.number}</span>
-      {ch.editCount > 0 && (
+      {(ch.editCount > 0 || ch.challonerCount > 0) && (
         <span class="chapter-badges">
-          <span class="badge-edits">{ch.editCount}e</span>
-          <span class="badge-notes">{ch.footnoteCount}n</span>
+          {ch.editCount > 0 && <span class="badge-edits">{ch.editCount}e</span>}
+          {ch.challonerCount > 0 && <span class="badge-challoner">{ch.challonerCount}c</span>}
+          {ch.footnoteCount > 0 && <span class="badge-notes">{ch.footnoteCount}n</span>}
         </span>
       )}
     </a>
@@ -124,6 +126,14 @@ const base = import.meta.env.BASE_URL;
     background: var(--color-accent);
   }
 
+  .chapter-link.has-challoner:not(.has-edits)::after {
+    background: color-mix(in srgb, var(--color-border) 30%, var(--color-bg));
+  }
+
+  .chapter-link.has-challoner:not(.has-edits)::before {
+    background: var(--color-muted);
+  }
+
   /* Gold shimmer effect on hover */
   .chapter-link:hover {
     transform: translateY(-3px) scale(1.05);
@@ -211,8 +221,17 @@ const base = import.meta.env.BASE_URL;
     border-radius: 2px;
   }
 
+  .badge-challoner {
+    font-size: 0.55rem;
+    background: var(--color-border);
+    color: var(--color-text);
+    padding: 0.1rem 0.25rem;
+    border-radius: 2px;
+  }
+
   .chapter-link:hover .badge-edits,
-  .chapter-link:hover .badge-notes {
+  .chapter-link:hover .badge-notes,
+  .chapter-link:hover .badge-challoner {
     background: white;
     color: var(--color-accent);
   }

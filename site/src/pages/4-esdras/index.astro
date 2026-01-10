@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ChapterList from '../../components/ChapterList.astro';
+import bible from '../../data/bible.json';
+
+const { esdras4 } = bible.supplementary;
+const base = import.meta.env.BASE_URL;
+
+// Format chapters for ChapterList component
+const chapters = esdras4.chapters.map(ch => ({
+  number: ch.number,
+  editCount: 0,
+  footnoteCount: 0,
+  challonerCount: 0,
+  hasIllustration: false
+}));
+---
+
+<BaseLayout title="4 Esdras" bookId="4-esdras">
+  <Fragment slot="breadcrumb">
+    <span class="breadcrumb">
+      <span>/</span>
+      <span>4 Esdras</span>
+    </span>
+  </Fragment>
+
+  <h1>{esdras4.title}</h1>
+
+  <div class="book-intro">
+    <p>
+      An apocalyptic text containing seven visions given to Ezra, addressing
+      the problem of evil and the coming messianic age.
+    </p>
+  </div>
+
+  <h2 class="chapter-heading">Chapters</h2>
+
+  <ChapterList
+    bookId="4-esdras"
+    bookName="4 Esdras"
+    chapters={chapters}
+  />
+
+  <aside class="about-note">
+    <h3>About This Book</h3>
+    <p>
+      The Fourth Book of Esdras, also known as 2 Esdras or the Apocalypse of Ezra,
+      is found in the Appendix to the Vulgate. This apocalyptic work contains
+      profound meditations on divine justice and the destiny of Israel.
+    </p>
+  </aside>
+</BaseLayout>
+
+<style>
+  .book-intro {
+    background: var(--color-patched);
+    border-left: 3px solid var(--color-accent);
+    padding: 1rem 1.25rem;
+    margin-bottom: 2rem;
+    font-style: italic;
+    color: var(--color-muted);
+    line-height: 1.6;
+  }
+
+  .chapter-heading {
+    font-size: 1.25rem;
+    color: var(--color-muted);
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+  }
+
+  .about-note {
+    margin-top: 3rem;
+    padding: 1.5rem;
+    background: var(--color-patched);
+    border-radius: 8px;
+  }
+
+  .about-note h3 {
+    font-family: var(--font-heading);
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-accent);
+    margin-bottom: 1rem;
+  }
+
+  .about-note p {
+    font-size: 0.95rem;
+    color: var(--color-muted);
+    margin: 0;
+  }
+</style>

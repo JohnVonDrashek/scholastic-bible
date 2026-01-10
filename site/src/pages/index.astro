@@ -43,7 +43,7 @@ function getBooks(ids: string[]) {
   return ids
     .map(id => bible.books.find(b => b.id === id))
     .filter(Boolean)
-    .map(b => ({ id: b.id, name: b.name, chapters: b.chapters.length, editCount: b.editCount, footnoteCount: b.footnoteCount, illustrationCount: countIllustrations(b.id) }));
+    .map(b => ({ id: b.id, name: b.name, chapters: b.chapters.length, editCount: b.editCount, footnoteCount: b.footnoteCount, challonerCount: b.challonerCount, illustrationCount: countIllustrations(b.id) }));
 }
 
 // Old Testament groups
@@ -62,6 +62,8 @@ const apocalypseBooks = getBooks(APOCALYPSE);
 ---
 
 <BaseLayout title="Home">
+  <div class="parallax-bg" id="parallax-bg"></div>
+  <div class="parallax-overlay"></div>
   <div class="hero">
     <img src={`${import.meta.env.BASE_URL}header.png`} alt="Scholastic Bible - Medieval illuminated manuscript style" class="hero-image" />
     <div class="hero-overlay">
@@ -85,9 +87,81 @@ const apocalypseBooks = getBooks(APOCALYPSE);
   <BookList title="Pauline Epistles" books={paulineBooks} />
   <BookList title="Catholic Epistles" books={catholicBooks} />
   <BookList title="Apocalypse" books={apocalypseBooks} />
+
+  <h2 class="testament-heading">Supplementary Materials</h2>
+  <div class="supplementary-grid">
+    <a href={`${import.meta.env.BASE_URL}glossary`} class="supp-card">
+      <h3>Hard Vvordes Explicated</h3>
+      <p>Glossary of archaic terms and theological vocabulary used in the translation</p>
+    </a>
+    <a href={`${import.meta.env.BASE_URL}preface`} class="supp-card">
+      <h3>Preface to the Reader</h3>
+      <p>The original translators' preface explaining their approach to this edition</p>
+    </a>
+    <a href={`${import.meta.env.BASE_URL}prayer-of-manasses`} class="supp-card">
+      <h3>Prayer of Manasses</h3>
+      <p>The penitential prayer of King Manasses of Judah</p>
+    </a>
+    <a href={`${import.meta.env.BASE_URL}3-esdras`} class="supp-card">
+      <h3>Third Book of Esdras</h3>
+      <p>Apocryphal text paralleling Chronicles, Ezra, and Nehemiah</p>
+    </a>
+    <a href={`${import.meta.env.BASE_URL}4-esdras`} class="supp-card">
+      <h3>Fourth Book of Esdras</h3>
+      <p>Apocalyptic visions addressing divine justice and Israel's destiny</p>
+    </a>
+  </div>
 </BaseLayout>
 
 <style>
+  .parallax-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/images/homepage-bg.png');
+    background-size: 115% auto;
+    background-position: center top;
+    background-repeat: no-repeat;
+    z-index: -2;
+    will-change: transform;
+    pointer-events: none;
+    view-transition-name: parallax-bg;
+  }
+
+  .parallax-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    view-transition-name: parallax-overlay;
+    background: linear-gradient(
+      to bottom,
+      rgba(250, 249, 247, 0.3) 0%,
+      rgba(250, 249, 247, 0.7) 30%,
+      rgba(250, 249, 247, 0.85) 60%,
+      rgba(250, 249, 247, 0.95) 100%
+    );
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  :global([data-theme="dark"]) .parallax-overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(26, 26, 26, 0.4) 0%,
+      rgba(26, 26, 26, 0.75) 30%,
+      rgba(26, 26, 26, 0.9) 60%,
+      rgba(26, 26, 26, 0.97) 100%
+    );
+  }
+
+  :global([data-theme="dark"]) .parallax-bg {
+    filter: brightness(0.4) sepia(0.4);
+  }
+
   .hero {
     position: relative;
     margin: 0 auto 2rem auto;
@@ -136,4 +210,88 @@ const apocalypseBooks = getBooks(APOCALYPSE);
   .testament-heading:first-of-type {
     margin-top: 1.5rem;
   }
+
+  .supplementary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  .supp-card {
+    display: block;
+    padding: 1.25rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .supp-card:hover {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 5%, var(--color-bg));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .supp-card h3 {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin: 0 0 0.5rem 0;
+  }
+
+  .supp-card p {
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    margin: 0;
+    line-height: 1.5;
+  }
 </style>
+
+<script>
+  function setupParallax() {
+    const bg = document.getElementById('parallax-bg');
+    if (!bg) return;
+
+    let ticking = false;
+
+    function updateParallax() {
+      const scrollY = window.scrollY;
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const scrollProgress = docHeight > 0 ? scrollY / docHeight : 0;
+
+      // 9:16 image at 115% width means height = width * 1.15 * (16/9)
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      const imageHeight = viewportWidth * 1.15 * (16 / 9); // 9:16 aspect ratio at 115% zoom
+
+      // Extra width on each side from 115% zoom = 7.5% of viewport width on each side
+      // Start with a negative offset to hide the top edge (proportional to the zoom)
+      const topOffset = viewportWidth * 0.075 * (16 / 9); // Hide top edge
+      const extraHeight = Math.max(0, imageHeight - viewportHeight - topOffset);
+
+      // As user scrolls 0->100%, background shifts from -topOffset to -(topOffset + extraHeight)
+      const yPos = -topOffset - (scrollProgress * extraHeight);
+
+      bg.style.backgroundPosition = `center ${yPos}px`;
+      ticking = false;
+    }
+
+    function onScroll() {
+      if (!ticking) {
+        requestAnimationFrame(updateParallax);
+        ticking = true;
+      }
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', updateParallax, { passive: true });
+    updateParallax(); // Initial position
+  }
+
+  // Run on initial load and after View Transitions
+  document.addEventListener('astro:page-load', setupParallax);
+</script>

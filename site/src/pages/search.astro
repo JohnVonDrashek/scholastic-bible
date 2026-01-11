@@ -11,7 +11,7 @@ const base = import.meta.env.BASE_URL;
     <input
       type="search"
       id="search-input"
-      placeholder="Search for words, phrases, or topics..."
+      placeholder="Search text or enter a reference (e.g., John 3:16)..."
       autocomplete="off"
       autofocus
     />
@@ -159,6 +159,124 @@ const base = import.meta.env.BASE_URL;
   let debounceTimer: number | null = null;
 
   const base = (window as any).__BASE_URL__ || '/';
+
+  // Book name to ID mapping (includes DR names, modern names, and abbreviations)
+  const bookMap: Record<string, string> = {
+    // Pentateuch
+    'genesis': 'genesis', 'gen': 'genesis', 'gn': 'genesis',
+    'exodus': 'exodus', 'exod': 'exodus', 'ex': 'exodus',
+    'leviticus': 'leviticus', 'lev': 'leviticus', 'lv': 'leviticus',
+    'numbers': 'numbers', 'num': 'numbers', 'nm': 'numbers',
+    'deuteronomy': 'deuteronomy', 'deut': 'deuteronomy', 'dt': 'deuteronomy',
+    // Historical
+    'josue': 'josue', 'joshua': 'josue', 'jos': 'josue', 'josh': 'josue',
+    'judges': 'judges', 'judg': 'judges', 'jgs': 'judges',
+    'ruth': 'ruth', 'ru': 'ruth',
+    '1samuel': '1-samuel', '1sam': '1-samuel', '1sm': '1-samuel', 'isamuel': '1-samuel', 'i samuel': '1-samuel', '1 samuel': '1-samuel',
+    '2samuel': '2-samuel', '2sam': '2-samuel', '2sm': '2-samuel', 'iisamuel': '2-samuel', 'ii samuel': '2-samuel', '2 samuel': '2-samuel',
+    '1kings': '1-kings', '1kgs': '1-kings', 'ikings': '1-kings', 'i kings': '1-kings', '1 kings': '1-kings', '3kings': '1-kings', '3 kings': '1-kings',
+    '2kings': '2-kings', '2kgs': '2-kings', 'iikings': '2-kings', 'ii kings': '2-kings', '2 kings': '2-kings', '4kings': '2-kings', '4 kings': '2-kings',
+    '1chronicles': '1-chronicles', '1chr': '1-chronicles', 'ichronicles': '1-chronicles', 'i chronicles': '1-chronicles', '1 chronicles': '1-chronicles', '1paralipomenon': '1-chronicles',
+    '2chronicles': '2-chronicles', '2chr': '2-chronicles', 'iichronicles': '2-chronicles', 'ii chronicles': '2-chronicles', '2 chronicles': '2-chronicles', '2paralipomenon': '2-chronicles',
+    'ezra': 'ezra', '1ezra': 'ezra', '1esdras': 'ezra', '1 esdras': 'ezra',
+    'nehemiah': 'nehemiah', 'neh': 'nehemiah', '2ezra': 'nehemiah', '2esdras': 'nehemiah', '2 esdras': 'nehemiah',
+    'tobias': 'tobias', 'tobit': 'tobias', 'tob': 'tobias',
+    'judith': 'judith', 'jdt': 'judith', 'jdth': 'judith',
+    'esther': 'esther', 'esth': 'esther', 'est': 'esther',
+    // Wisdom
+    'job': 'job', 'jb': 'job',
+    'psalms': 'psalms', 'psalm': 'psalms', 'ps': 'psalms', 'pss': 'psalms',
+    'proverbs': 'proverbs', 'prov': 'proverbs', 'prv': 'proverbs',
+    'ecclesiastes': 'ecclesiastes', 'eccl': 'ecclesiastes', 'eccles': 'ecclesiastes', 'qoheleth': 'ecclesiastes', 'qoh': 'ecclesiastes',
+    'canticles': 'canticles', 'canticle': 'canticles', 'song': 'canticles', 'songofsolomon': 'canticles', 'song of solomon': 'canticles', 'songofsongs': 'canticles', 'song of songs': 'canticles', 'sos': 'canticles', 'sg': 'canticles',
+    'wisdom': 'wisdom', 'wis': 'wisdom', 'wisdomofsolomon': 'wisdom', 'wisdom of solomon': 'wisdom',
+    'ecclesiasticus': 'ecclesiasticus', 'sirach': 'ecclesiasticus', 'sir': 'ecclesiasticus', 'ben sira': 'ecclesiasticus',
+    // Prophets
+    'isaias': 'isaias', 'isaiah': 'isaias', 'isa': 'isaias', 'is': 'isaias',
+    'jeremias': 'jeremias', 'jeremiah': 'jeremias', 'jer': 'jeremias',
+    'lamentations': 'lamentations', 'lam': 'lamentations',
+    'baruch': 'baruch', 'bar': 'baruch',
+    'ezechiel': 'ezechiel', 'ezekiel': 'ezechiel', 'ezek': 'ezechiel', 'ez': 'ezechiel',
+    'daniel': 'daniel', 'dan': 'daniel', 'dn': 'daniel',
+    'osee': 'osee', 'hosea': 'osee', 'hos': 'osee',
+    'joel': 'joel', 'jl': 'joel',
+    'amos': 'amos', 'am': 'amos',
+    'abdias': 'abdias', 'obadiah': 'abdias', 'obad': 'abdias', 'ob': 'abdias',
+    'jonas': 'jonas', 'jonah': 'jonas', 'jon': 'jonas',
+    'micheas': 'micheas', 'micah': 'micheas', 'mic': 'micheas',
+    'nahum': 'nahum', 'nah': 'nahum', 'na': 'nahum',
+    'habacuc': 'habacuc', 'habakkuk': 'habacuc', 'hab': 'habacuc',
+    'sophonias': 'sophonias', 'zephaniah': 'sophonias', 'zeph': 'sophonias',
+    'aggeus': 'aggeus', 'haggai': 'aggeus', 'hag': 'aggeus', 'hg': 'aggeus',
+    'zacharias': 'zacharias', 'zechariah': 'zacharias', 'zech': 'zacharias', 'zec': 'zacharias',
+    'malachias': 'malachias', 'malachi': 'malachias', 'mal': 'malachias',
+    '1machabees': '1-machabees', '1maccabees': '1-machabees', '1macc': '1-machabees', '1mac': '1-machabees', 'imachabees': '1-machabees', 'i machabees': '1-machabees', '1 machabees': '1-machabees', '1 maccabees': '1-machabees',
+    '2machabees': '2-machabees', '2maccabees': '2-machabees', '2macc': '2-machabees', '2mac': '2-machabees', 'iimachabees': '2-machabees', 'ii machabees': '2-machabees', '2 machabees': '2-machabees', '2 maccabees': '2-machabees',
+    // New Testament
+    'matthew': 'matthew', 'matt': 'matthew', 'mt': 'matthew',
+    'mark': 'mark', 'mk': 'mark',
+    'luke': 'luke', 'lk': 'luke',
+    'john': 'john', 'jn': 'john', 'jhn': 'john',
+    'acts': 'acts', 'actsoftheapostles': 'acts', 'acts of the apostles': 'acts',
+    'romans': 'romans', 'rom': 'romans', 'rm': 'romans',
+    '1corinthians': '1-corinthians', '1cor': '1-corinthians', 'icorinthians': '1-corinthians', 'i corinthians': '1-corinthians', '1 corinthians': '1-corinthians',
+    '2corinthians': '2-corinthians', '2cor': '2-corinthians', 'iicorinthians': '2-corinthians', 'ii corinthians': '2-corinthians', '2 corinthians': '2-corinthians',
+    'galatians': 'galatians', 'gal': 'galatians',
+    'ephesians': 'ephesians', 'eph': 'ephesians',
+    'philippians': 'philippians', 'phil': 'philippians', 'php': 'philippians',
+    'colossians': 'colossians', 'col': 'colossians',
+    '1thessalonians': '1-thessalonians', '1thess': '1-thessalonians', '1thes': '1-thessalonians', 'ithessalonians': '1-thessalonians', 'i thessalonians': '1-thessalonians', '1 thessalonians': '1-thessalonians',
+    '2thessalonians': '2-thessalonians', '2thess': '2-thessalonians', '2thes': '2-thessalonians', 'iithessalonians': '2-thessalonians', 'ii thessalonians': '2-thessalonians', '2 thessalonians': '2-thessalonians',
+    '1timothy': '1-timothy', '1tim': '1-timothy', 'itimothy': '1-timothy', 'i timothy': '1-timothy', '1 timothy': '1-timothy',
+    '2timothy': '2-timothy', '2tim': '2-timothy', 'iitimothy': '2-timothy', 'ii timothy': '2-timothy', '2 timothy': '2-timothy',
+    'titus': 'titus', 'ti': 'titus',
+    'philemon': 'philemon', 'phlm': 'philemon', 'phm': 'philemon',
+    'hebrews': 'hebrews', 'heb': 'hebrews',
+    'james': 'james', 'jas': 'james', 'jm': 'james',
+    '1peter': '1-peter', '1pet': '1-peter', '1pt': '1-peter', 'ipeter': '1-peter', 'i peter': '1-peter', '1 peter': '1-peter',
+    '2peter': '2-peter', '2pet': '2-peter', '2pt': '2-peter', 'iipeter': '2-peter', 'ii peter': '2-peter', '2 peter': '2-peter',
+    '1john': '1-john', '1jn': '1-john', 'ijohn': '1-john', 'i john': '1-john', '1 john': '1-john',
+    '2john': '2-john', '2jn': '2-john', 'iijohn': '2-john', 'ii john': '2-john', '2 john': '2-john',
+    '3john': '3-john', '3jn': '3-john', 'iiijohn': '3-john', 'iii john': '3-john', '3 john': '3-john',
+    'jude': 'jude', 'jud': 'jude',
+    'apocalypse': 'apocalypse', 'revelation': 'apocalypse', 'rev': 'apocalypse', 'rv': 'apocalypse', 'apoc': 'apocalypse'
+  };
+
+  /**
+   * Try to parse a verse reference from the query string.
+   * Returns { bookId, chapter, verse } or null if not a verse reference.
+   * Examples: "Sirach 3:21", "Gen 1:1", "1 John 3:16", "John 3:16-18"
+   */
+  function parseVerseReference(query: string): { bookId: string; chapter: number; verse: number } | null {
+    // Normalize query
+    const q = query.trim();
+
+    // Pattern: optional number prefix, book name, chapter:verse (with optional range)
+    // Examples: "Genesis 1:1", "1 John 3:16", "Sirach 3:21-23", "Gen 1:1"
+    const match = q.match(/^(\d?\s*[a-z]+(?:\s+[a-z]+)?)\s*(\d+)\s*:\s*(\d+)(?:\s*-\s*\d+)?$/i);
+
+    if (!match) return null;
+
+    const [, bookPart, chapterStr, verseStr] = match;
+    const chapter = parseInt(chapterStr, 10);
+    const verse = parseInt(verseStr, 10);
+
+    if (isNaN(chapter) || isNaN(verse)) return null;
+
+    // Normalize book name: lowercase, remove spaces for lookup
+    const bookNormalized = bookPart.toLowerCase().replace(/\s+/g, '');
+    const bookId = bookMap[bookNormalized];
+
+    // Also try with spaces preserved for multi-word names
+    const bookWithSpaces = bookPart.toLowerCase().trim();
+    const bookIdAlt = bookMap[bookWithSpaces];
+
+    const finalBookId = bookId || bookIdAlt;
+
+    if (!finalBookId) return null;
+
+    return { bookId: finalBookId, chapter, verse };
+  }
 
   async function loadSearchIndex(): Promise<void> {
     const statusEl = document.getElementById('search-status');
@@ -336,7 +454,7 @@ const base = import.meta.env.BASE_URL;
     }).join('');
   }
 
-  function performSearch(query: string): void {
+  function performSearch(query: string, navigateOnVerseRef: boolean = true): void {
     const statusEl = document.getElementById('search-status');
     const container = document.getElementById('search-results');
 
@@ -347,6 +465,15 @@ const base = import.meta.env.BASE_URL;
       const url = new URL(window.location.href);
       url.searchParams.delete('q');
       window.history.replaceState({}, '', url.toString());
+      return;
+    }
+
+    // Check if query is a verse reference (e.g., "Sirach 3:21")
+    const verseRef = parseVerseReference(query);
+    if (verseRef && navigateOnVerseRef) {
+      const verseUrl = `${base}${verseRef.bookId}/${verseRef.chapter}/#v${verseRef.verse}`;
+      if (statusEl) statusEl.textContent = `Navigating to ${query}...`;
+      window.location.href = verseUrl;
       return;
     }
 

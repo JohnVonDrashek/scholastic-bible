@@ -1,6 +1,13 @@
 # Contributing to Scholastic Bible
 
-Thank you for your interest in contributing to the Scholastic Bible project. This guide will help you get started.
+First off, **thank you** for considering contributing! I truly believe in open source and the power of community collaboration. Unlike many repositories, I actively welcome contributions of all kinds - from bug fixes to new features.
+
+## My Promise to Contributors
+
+- **I will respond to every PR and issue** - I guarantee feedback on all contributions
+- **Bug fixes are obvious accepts** - If it fixes a bug, it's getting merged
+- **New features are welcome** - I'm genuinely open to new ideas and enhancements
+- **Direct line of communication** - If I'm not responding to a PR or issue, email me directly at johnvondrashek@gmail.com
 
 ## Project Vision
 
@@ -118,7 +125,7 @@ npm run site:build
 
 ### 3. Enhance the CLI
 
-The CLI (`bin/bible.js`) provides verse lookup across multiple translations. Improvements to parsing, output formatting, or new features are welcome.
+The CLI (`bin/bible.js`) provides verse lookup across multiple translations (Douay-Rheims, Latin Vulgate, Greek Septuagint, Hebrew Masoretic). Improvements to parsing, output formatting, or new features are welcome.
 
 ### 4. Add Source Texts
 
@@ -134,11 +141,12 @@ Source texts live in `texts/` with parsers in `lib/parsers/`. If you have expert
 
 ## Code of Conduct
 
-Contributors are expected to engage respectfully with both the sacred texts and fellow contributors. This is a project rooted in the Catholic intellectual tradition; contributions should reflect that context.
+This project follows the [Rule of St. Benedict](CODE_OF_CONDUCT.md) as its code of conduct.
 
 ## Questions?
 
-Open an issue or reach out to the maintainer.
+- Open an issue
+- Email: johnvondrashek@gmail.com
 
 ---
 

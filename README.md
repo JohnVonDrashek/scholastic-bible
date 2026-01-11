@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="site/public/icon.svg" alt="Scholastic Bible" width="120" />
+</p>
+
 # Scholastic Bible
 
 ![License](https://img.shields.io/badge/license-MIT-blue)

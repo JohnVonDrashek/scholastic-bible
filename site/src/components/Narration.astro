@@ -36,20 +36,15 @@ const hasTimingData = timingData && timingData.length > 0;
     <!-- Pre-recorded audio mode -->
     <div class="narration-controls audio-mode">
       <div class="playback-controls">
-        <button id="narration-btn" class="narration-btn" title="Play/Pause">
-          <svg class="icon-play" viewBox="0 0 24 24" width="22" height="22">
+        <button id="narration-btn" class="narration-btn pill" title="Play/Pause">
+          <svg class="icon-play" viewBox="0 0 24 24" width="20" height="20">
             <path fill="currentColor" d="M8 5v14l11-7z"/>
           </svg>
-          <svg class="icon-pause" viewBox="0 0 24 24" width="22" height="22" style="display:none">
+          <svg class="icon-pause" viewBox="0 0 24 24" width="20" height="20" style="display:none">
             <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
           </svg>
+          <span id="narration-status" class="narration-status">Play</span>
         </button>
-        <button id="narration-stop" class="narration-stop" title="Stop" style="display:none">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path fill="currentColor" d="M6 6h12v12H6z"/>
-          </svg>
-        </button>
-        <span id="narration-status" class="narration-status">Ready</span>
       </div>
 
       <div class="narration-divider"></div>
@@ -93,20 +88,15 @@ const hasTimingData = timingData && timingData.length > 0;
     <!-- TTS fallback mode -->
     <div class="narration-controls tts-mode">
       <div class="playback-controls">
-        <button id="narration-btn" class="narration-btn" title="Listen to chapter">
-          <svg class="icon-play" viewBox="0 0 24 24" width="22" height="22">
+        <button id="narration-btn" class="narration-btn pill" title="Listen to chapter">
+          <svg class="icon-play" viewBox="0 0 24 24" width="20" height="20">
             <path fill="currentColor" d="M8 5v14l11-7z"/>
           </svg>
-          <svg class="icon-pause" viewBox="0 0 24 24" width="22" height="22" style="display:none">
+          <svg class="icon-pause" viewBox="0 0 24 24" width="20" height="20" style="display:none">
             <path fill="currentColor" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>
           </svg>
+          <span id="narration-status" class="narration-status">Play</span>
         </button>
-        <button id="narration-stop" class="narration-stop" title="Stop" style="display:none">
-          <svg viewBox="0 0 24 24" width="16" height="16">
-            <path fill="currentColor" d="M6 6h12v12H6z"/>
-          </svg>
-        </button>
-        <span id="narration-status" class="narration-status">Ready</span>
       </div>
 
       <div class="narration-divider"></div>
@@ -176,7 +166,6 @@ const hasTimingData = timingData && timingData.length > 0;
     const narrationBar = document.querySelector('.narration-bar') as HTMLElement;
     const audio = document.getElementById('audio-player') as HTMLAudioElement;
     const btn = document.getElementById('narration-btn') as HTMLButtonElement;
-    const stopBtn = document.getElementById('narration-stop') as HTMLButtonElement;
     const progressBar = document.getElementById('progress-bar') as HTMLInputElement;
     const timeCurrent = document.getElementById('time-current') as HTMLSpanElement;
     const timeTotal = document.getElementById('time-total') as HTMLSpanElement;
@@ -339,18 +328,11 @@ const hasTimingData = timingData && timingData.length > 0;
       if (!audio.paused) {
         iconPlay.style.display = 'none';
         iconPause.style.display = 'block';
-        statusEl.textContent = 'Playing';
-        stopBtn.style.display = 'flex';
-      } else if (audio.currentTime > 0) {
-        iconPlay.style.display = 'block';
-        iconPause.style.display = 'none';
-        statusEl.textContent = 'Paused';
-        stopBtn.style.display = 'flex';
+        statusEl.textContent = 'Pause';
       } else {
         iconPlay.style.display = 'block';
         iconPause.style.display = 'none';
-        statusEl.textContent = 'Ready';
-        stopBtn.style.display = 'none';
+        statusEl.textContent = 'Play';
       }
     }
 
@@ -385,33 +367,24 @@ const hasTimingData = timingData && timingData.length > 0;
     audio.addEventListener('play', updateUI);
     audio.addEventListener('pause', updateUI);
 
-    // Clone buttons to remove old event listeners
+    // Clone button to remove old event listeners
     const newBtn = btn.cloneNode(true) as HTMLButtonElement;
     btn.parentNode?.replaceChild(newBtn, btn);
-    const newStopBtn = stopBtn.cloneNode(true) as HTMLButtonElement;
-    stopBtn.parentNode?.replaceChild(newStopBtn, stopBtn);
 
     // Get new references
     const activeIconPlay = newBtn.querySelector('.icon-play') as SVGElement;
     const activeIconPause = newBtn.querySelector('.icon-pause') as SVGElement;
 
     function updateUIActive() {
-      const activeStatusEl = document.getElementById('narration-status') as HTMLSpanElement;
+      const activeStatusEl = newBtn.querySelector('.narration-status') as HTMLSpanElement;
       if (!audio.paused) {
         activeIconPlay.style.display = 'none';
         activeIconPause.style.display = 'block';
-        if (activeStatusEl) activeStatusEl.textContent = 'Playing';
-        newStopBtn.style.display = 'flex';
-      } else if (audio.currentTime > 0) {
-        activeIconPlay.style.display = 'block';
-        activeIconPause.style.display = 'none';
-        if (activeStatusEl) activeStatusEl.textContent = 'Paused';
-        newStopBtn.style.display = 'flex';
+        if (activeStatusEl) activeStatusEl.textContent = 'Pause';
       } else {
         activeIconPlay.style.display = 'block';
         activeIconPause.style.display = 'none';
-        if (activeStatusEl) activeStatusEl.textContent = 'Ready';
-        newStopBtn.style.display = 'none';
+        if (activeStatusEl) activeStatusEl.textContent = 'Play';
       }
     }
 
@@ -422,14 +395,6 @@ const hasTimingData = timingData && timingData.length > 0;
       } else {
         audio.pause();
       }
-      updateUIActive();
-    });
-
-    // Stop button
-    newStopBtn.addEventListener('click', () => {
-      audio.pause();
-      audio.currentTime = 0;
-      clearHighlighting();
       updateUIActive();
     });
 
@@ -498,7 +463,6 @@ const hasTimingData = timingData && timingData.length > 0;
    */
   function setupTTSMode() {
     const btn = document.getElementById('narration-btn') as HTMLButtonElement;
-    const stopBtn = document.getElementById('narration-stop') as HTMLButtonElement;
     const voiceSelect = document.getElementById('voice-select') as HTMLSelectElement;
     const verseInput = document.getElementById('verse-input') as HTMLInputElement;
     const verseTotal = document.getElementById('verse-total') as HTMLSpanElement;
@@ -509,7 +473,7 @@ const hasTimingData = timingData && timingData.length > 0;
 
     const iconPlay = btn.querySelector('.icon-play') as SVGElement;
     const iconPause = btn.querySelector('.icon-pause') as SVGElement;
-    const statusEl = document.getElementById('narration-status') as HTMLSpanElement;
+    const statusEl = btn.querySelector('.narration-status') as HTMLSpanElement;
 
     let utterance: SpeechSynthesisUtterance | null = null;
     let verses: { number: string; text: string; element: Element }[] = [];
@@ -722,32 +686,23 @@ const hasTimingData = timingData && timingData.length > 0;
       }
     }
 
-    // Clone buttons to remove old event listeners
+    // Clone button to remove old event listeners
     const newBtn = btn.cloneNode(true) as HTMLButtonElement;
     btn.parentNode?.replaceChild(newBtn, btn);
-    const newStopBtn = stopBtn.cloneNode(true) as HTMLButtonElement;
-    stopBtn.parentNode?.replaceChild(newStopBtn, stopBtn);
 
     const activeIconPlay = newBtn.querySelector('.icon-play') as SVGElement;
     const activeIconPause = newBtn.querySelector('.icon-pause') as SVGElement;
-    const activeStatusEl = document.getElementById('narration-status') as HTMLSpanElement;
+    const activeStatusEl = newBtn.querySelector('.narration-status') as HTMLSpanElement;
 
     function updateUIActive() {
       if (isPlaying && !isPaused) {
         activeIconPlay.style.display = 'none';
         activeIconPause.style.display = 'block';
-        if (activeStatusEl) activeStatusEl.textContent = 'Playing';
-        newStopBtn.style.display = 'flex';
-      } else if (isPaused) {
-        activeIconPlay.style.display = 'block';
-        activeIconPause.style.display = 'none';
-        if (activeStatusEl) activeStatusEl.textContent = 'Paused';
-        newStopBtn.style.display = 'flex';
+        if (activeStatusEl) activeStatusEl.textContent = 'Pause';
       } else {
         activeIconPlay.style.display = 'block';
         activeIconPause.style.display = 'none';
-        if (activeStatusEl) activeStatusEl.textContent = 'Ready';
-        newStopBtn.style.display = 'none';
+        if (activeStatusEl) activeStatusEl.textContent = 'Play';
       }
     }
 
@@ -839,8 +794,6 @@ const hasTimingData = timingData && timingData.length > 0;
         playActive();
       }
     });
-
-    newStopBtn.addEventListener('click', stopActive);
 
     speedSelect?.addEventListener('change', () => {
       localStorage.setItem(SPEED_STORAGE_KEY, speedSelect.value);
@@ -986,19 +939,23 @@ const hasTimingData = timingData && timingData.length > 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
     background: linear-gradient(135deg, var(--color-accent) 0%, color-mix(in srgb, var(--color-accent) 85%, black) 100%);
     color: white;
     border: none;
-    border-radius: 50%;
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
   }
 
+  .narration-btn.pill {
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem 0.75rem 1rem;
+    border-radius: 100px;
+    min-height: 48px;
+  }
+
   .narration-btn:hover {
-    transform: scale(1.05);
+    transform: scale(1.03);
     box-shadow: 0 4px 12px rgba(139, 69, 19, 0.4);
   }
 
@@ -1006,34 +963,13 @@ const hasTimingData = timingData && timingData.length > 0;
     transform: scale(0.98);
   }
 
-  .narration-stop {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    background: var(--color-bg);
-    color: var(--color-muted);
-    border: 1px solid var(--color-border);
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.2s ease;
-  }
-
-  .narration-stop:hover {
-    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
-    color: var(--color-accent);
-    border-color: var(--color-accent);
-  }
-
-  .narration-status {
+  .narration-btn .narration-status {
     font-family: var(--font-sans);
-    font-size: 0.8rem;
-    font-weight: 500;
-    color: var(--color-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: white;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    min-width: 50px;
   }
 
   .narration-divider {
@@ -1184,20 +1120,23 @@ const hasTimingData = timingData && timingData.length > 0;
   .scroll-toggle {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.5rem;
     cursor: pointer;
     font-family: var(--font-sans);
-    font-size: 0.75rem;
+    font-size: 0.85rem;
     color: var(--color-muted);
-    padding: 0.4rem 0.6rem;
-    border-radius: 4px;
-    transition: all 0.15s ease;
+    padding: 0.6rem 1rem;
+    border-radius: 100px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+    transition: all 0.2s ease;
     margin-left: auto;
+    min-height: 40px;
   }
 
   .scroll-toggle:hover {
-    background: color-mix(in srgb, var(--color-accent) 8%, transparent);
-    color: var(--color-text);
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 5%, var(--color-bg));
   }
 
   .scroll-toggle input {
@@ -1209,20 +1148,36 @@ const hasTimingData = timingData && timingData.length > 0;
 
   .scroll-icon {
     color: var(--color-muted);
-    transition: color 0.15s ease;
+    transition: all 0.2s ease;
   }
 
   .scroll-toggle input:checked ~ .scroll-icon {
-    color: var(--color-accent);
+    color: white;
   }
 
   .scroll-label {
     user-select: none;
-    font-weight: 500;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    transition: color 0.2s ease;
   }
 
   .scroll-toggle input:checked ~ .scroll-label {
-    color: var(--color-text);
+    color: white;
+  }
+
+  /* Active state - filled pill */
+  .scroll-toggle:has(input:checked) {
+    background: linear-gradient(135deg, var(--color-accent) 0%, color-mix(in srgb, var(--color-accent) 85%, black) 100%);
+    border-color: transparent;
+    color: white;
+    box-shadow: 0 2px 6px rgba(139, 69, 19, 0.3);
+  }
+
+  .scroll-toggle:has(input:checked):hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 12px rgba(139, 69, 19, 0.4);
   }
 
   .voice-row {

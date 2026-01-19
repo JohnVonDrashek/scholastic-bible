@@ -1,0 +1,374 @@
+---
+/**
+ * FourfoldTabs - Catholic fourfold interpretation of Scripture
+ *
+ * Five tabs presenting Scripture and the four senses of interpretation:
+ * 1. Scripture - The Bible text itself
+ * 2. Literal (Historical) - Commentary on the plain meaning of the text
+ * 3. Allegorical (Christological) - How the text points to Christ and the Church
+ * 4. Moral (Tropological) - How the text guides moral conduct
+ * 5. Anagogical (Eschatological) - How the text points to heavenly/eternal realities
+ */
+
+interface Props {
+  uniqueId: string; // Unique ID for radio buttons (e.g., "genesis-1")
+}
+
+const { uniqueId } = Astro.props;
+---
+
+<div class="fourfold-tabs">
+  <!-- Radio buttons must be siblings of tabs-content for CSS to work -->
+  <input
+    type="radio"
+    id={`${uniqueId}-scripture`}
+    name={`${uniqueId}-tabs`}
+    class="tab-radio"
+    checked
+  />
+  <input
+    type="radio"
+    id={`${uniqueId}-literal`}
+    name={`${uniqueId}-tabs`}
+    class="tab-radio"
+  />
+  <input
+    type="radio"
+    id={`${uniqueId}-allegorical`}
+    name={`${uniqueId}-tabs`}
+    class="tab-radio"
+  />
+  <input
+    type="radio"
+    id={`${uniqueId}-moral`}
+    name={`${uniqueId}-tabs`}
+    class="tab-radio"
+  />
+  <input
+    type="radio"
+    id={`${uniqueId}-anagogical`}
+    name={`${uniqueId}-tabs`}
+    class="tab-radio"
+  />
+
+  <div class="tabs-header">
+    <label for={`${uniqueId}-scripture`} class="tab-label tab-scripture">
+      <span class="tab-icon">S</span>
+      <span class="tab-text">Scripture</span>
+    </label>
+
+    <label for={`${uniqueId}-literal`} class="tab-label tab-literal">
+      <span class="tab-icon">I</span>
+      <span class="tab-text">Literal</span>
+    </label>
+
+    <label for={`${uniqueId}-allegorical`} class="tab-label tab-allegorical">
+      <span class="tab-icon">II</span>
+      <span class="tab-text">Allegorical</span>
+    </label>
+
+    <label for={`${uniqueId}-moral`} class="tab-label tab-moral">
+      <span class="tab-icon">III</span>
+      <span class="tab-text">Moral</span>
+    </label>
+
+    <label for={`${uniqueId}-anagogical`} class="tab-label tab-anagogical">
+      <span class="tab-icon">IV</span>
+      <span class="tab-text">Anagogical</span>
+    </label>
+  </div>
+
+  <div class="tabs-content">
+    <div class="tab-panel panel-scripture">
+      <slot name="scripture" />
+    </div>
+
+    <div class="tab-panel panel-literal">
+      <slot name="literal">
+        <div class="placeholder-content">
+          <h3>Literal Interpretation</h3>
+          <p class="placeholder-subtitle">The plain, historical meaning of the text</p>
+          <div class="placeholder-divider"></div>
+          <p class="placeholder-text">
+            The literal sense is the meaning conveyed by the words of Scripture and discovered
+            by exegesis, following the rules of sound interpretation. It examines the historical
+            context, the author's intent, and the plain meaning of the sacred text.
+          </p>
+          <p class="placeholder-coming">Commentary coming soon...</p>
+        </div>
+      </slot>
+    </div>
+
+    <div class="tab-panel panel-allegorical">
+      <slot name="allegorical">
+        <div class="placeholder-content">
+          <h3>Allegorical Interpretation</h3>
+          <p class="placeholder-subtitle">How this text points to Christ and the Church</p>
+          <div class="placeholder-divider"></div>
+          <p class="placeholder-text">
+            The allegorical sense reveals how the events, persons, and institutions of Scripture
+            prefigure Christ and His Church. This interpretation uncovers the deeper spiritual
+            meaning hidden within the historical narrative.
+          </p>
+          <p class="placeholder-coming">Commentary coming soon...</p>
+        </div>
+      </slot>
+    </div>
+
+    <div class="tab-panel panel-moral">
+      <slot name="moral">
+        <div class="placeholder-content">
+          <h3>Moral Interpretation</h3>
+          <p class="placeholder-subtitle">How this text guides our conduct</p>
+          <div class="placeholder-divider"></div>
+          <p class="placeholder-text">
+            The moral (or tropological) sense shows how Scripture instructs us in virtuous living.
+            It draws practical lessons for the Christian life from the sacred text, guiding
+            the faithful toward holiness.
+          </p>
+          <p class="placeholder-coming">Commentary coming soon...</p>
+        </div>
+      </slot>
+    </div>
+
+    <div class="tab-panel panel-anagogical">
+      <slot name="anagogical">
+        <div class="placeholder-content">
+          <h3>Anagogical Interpretation</h3>
+          <p class="placeholder-subtitle">How this text points to eternal realities</p>
+          <div class="placeholder-divider"></div>
+          <p class="placeholder-text">
+            The anagogical sense lifts our minds to heavenly things, showing how earthly
+            realities in Scripture foreshadow the glory of heaven and the life to come.
+            It directs our hope toward our final destiny with God.
+          </p>
+          <p class="placeholder-coming">Commentary coming soon...</p>
+        </div>
+      </slot>
+    </div>
+  </div>
+</div>
+
+<style is:global>
+  .fourfold-tabs {
+    margin: 1.5rem 0;
+  }
+
+  .fourfold-tabs .tab-radio {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .fourfold-tabs .tabs-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    border-bottom: 2px solid var(--color-border);
+    margin-bottom: 0;
+  }
+
+  .fourfold-tabs .tab-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    font-family: var(--font-heading);
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    cursor: pointer;
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    margin-bottom: -2px;
+    transition: all 0.2s ease;
+    background: transparent;
+  }
+
+  .fourfold-tabs .tab-label:hover {
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  }
+
+  .fourfold-tabs .tab-icon {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--color-accent);
+    opacity: 0.7;
+  }
+
+  .fourfold-tabs .tab-text {
+    letter-spacing: 0.02em;
+  }
+
+  /* Tab panels */
+  .fourfold-tabs .tabs-content {
+    border: 1px solid var(--color-border);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    background: var(--color-bg);
+  }
+
+  .fourfold-tabs .tab-panel {
+    display: none;
+    padding: 1.5rem;
+  }
+
+  /* Active tab label states - use general sibling combinator */
+  .fourfold-tabs .tab-radio[id$="-scripture"]:checked ~ .tabs-header .tab-scripture,
+  .fourfold-tabs .tab-radio[id$="-literal"]:checked ~ .tabs-header .tab-literal,
+  .fourfold-tabs .tab-radio[id$="-allegorical"]:checked ~ .tabs-header .tab-allegorical,
+  .fourfold-tabs .tab-radio[id$="-moral"]:checked ~ .tabs-header .tab-moral,
+  .fourfold-tabs .tab-radio[id$="-anagogical"]:checked ~ .tabs-header .tab-anagogical {
+    color: var(--color-text);
+    background: var(--color-bg);
+    border-color: var(--color-border);
+    border-bottom-color: var(--color-bg);
+  }
+
+  .fourfold-tabs .tab-radio[id$="-scripture"]:checked ~ .tabs-header .tab-scripture .tab-icon,
+  .fourfold-tabs .tab-radio[id$="-literal"]:checked ~ .tabs-header .tab-literal .tab-icon,
+  .fourfold-tabs .tab-radio[id$="-allegorical"]:checked ~ .tabs-header .tab-allegorical .tab-icon,
+  .fourfold-tabs .tab-radio[id$="-moral"]:checked ~ .tabs-header .tab-moral .tab-icon,
+  .fourfold-tabs .tab-radio[id$="-anagogical"]:checked ~ .tabs-header .tab-anagogical .tab-icon {
+    opacity: 1;
+  }
+
+  /* Show the correct panel based on which radio is checked */
+  .fourfold-tabs .tab-radio[id$="-scripture"]:checked ~ .tabs-content .panel-scripture,
+  .fourfold-tabs .tab-radio[id$="-literal"]:checked ~ .tabs-content .panel-literal,
+  .fourfold-tabs .tab-radio[id$="-allegorical"]:checked ~ .tabs-content .panel-allegorical,
+  .fourfold-tabs .tab-radio[id$="-moral"]:checked ~ .tabs-content .panel-moral,
+  .fourfold-tabs .tab-radio[id$="-anagogical"]:checked ~ .tabs-content .panel-anagogical {
+    display: block;
+  }
+
+  /* Focus state for accessibility */
+  .fourfold-tabs .tab-radio:focus-visible ~ .tabs-header .tab-label {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
+  /* Placeholder content styling */
+  .fourfold-tabs .placeholder-content {
+    text-align: center;
+    padding: 2rem 1rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .fourfold-tabs .placeholder-content h3 {
+    font-family: var(--font-heading);
+    font-size: 1.4rem;
+    font-weight: 500;
+    color: var(--color-text);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.03em;
+  }
+
+  .fourfold-tabs .placeholder-subtitle {
+    font-style: italic;
+    color: var(--color-accent);
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .fourfold-tabs .placeholder-divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(
+      to right,
+      transparent,
+      var(--color-accent),
+      transparent
+    );
+    margin: 0 auto 1.5rem;
+  }
+
+  .fourfold-tabs .placeholder-text {
+    color: var(--color-muted);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  .fourfold-tabs .placeholder-coming {
+    font-family: var(--font-heading);
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+
+  /* Mobile adjustments */
+  @media (max-width: 600px) {
+    .fourfold-tabs .tabs-header {
+      gap: 0;
+    }
+
+    .fourfold-tabs .tab-label {
+      flex: 1;
+      justify-content: center;
+      padding: 0.6rem 0.5rem;
+      font-size: 0.8rem;
+    }
+
+    .fourfold-tabs .tab-icon {
+      display: none;
+    }
+
+    .fourfold-tabs .tab-panel {
+      padding: 1rem;
+    }
+
+    .fourfold-tabs .placeholder-content {
+      padding: 1rem 0.5rem;
+    }
+
+    .fourfold-tabs .placeholder-content h3 {
+      font-size: 1.2rem;
+    }
+  }
+
+  /* Very small screens - stack tabs */
+  @media (max-width: 400px) {
+    .fourfold-tabs .tabs-header {
+      flex-direction: column;
+      border-bottom: none;
+      border: 1px solid var(--color-border);
+      border-radius: 6px 6px 0 0;
+      overflow: hidden;
+    }
+
+    .fourfold-tabs .tab-label {
+      border-radius: 0;
+      margin-bottom: 0;
+      border: none;
+      border-bottom: 1px solid var(--color-border);
+      justify-content: flex-start;
+      padding: 0.75rem 1rem;
+    }
+
+    .fourfold-tabs .tab-label:last-of-type {
+      border-bottom: none;
+    }
+
+    .fourfold-tabs .tab-radio[id$="-scripture"]:checked ~ .tabs-header .tab-scripture,
+    .fourfold-tabs .tab-radio[id$="-literal"]:checked ~ .tabs-header .tab-literal,
+    .fourfold-tabs .tab-radio[id$="-allegorical"]:checked ~ .tabs-header .tab-allegorical,
+    .fourfold-tabs .tab-radio[id$="-moral"]:checked ~ .tabs-header .tab-moral,
+    .fourfold-tabs .tab-radio[id$="-anagogical"]:checked ~ .tabs-header .tab-anagogical {
+      background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+      border-color: var(--color-border);
+    }
+
+    .fourfold-tabs .tab-icon {
+      display: inline;
+      min-width: 1.5rem;
+    }
+
+    .fourfold-tabs .tabs-content {
+      border-radius: 0 0 6px 6px;
+    }
+  }
+</style>

@@ -6,6 +6,7 @@ import VerseDivider from '../../components/VerseDivider.astro';
 import Navigation from '../../components/Navigation.astro';
 import Narration from '../../components/Narration.astro';
 import ReadingProgress from '../../components/ReadingProgress.astro';
+import FourfoldTabs from '../../components/FourfoldTabs.astro';
 import bible from '../../data/bible.json';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -72,6 +73,24 @@ if (fs.existsSync(timingPath)) {
   }
 }
 
+// Load fourfold commentary data (if available)
+interface CommentaryData {
+  literal?: string;
+  allegorical?: string;
+  moral?: string;
+  anagogical?: string;
+}
+let commentary: CommentaryData | undefined;
+const commentaryPath = path.join(process.cwd(), 'src', 'data', 'commentary', book.id, `${chapterNum}.json`);
+if (fs.existsSync(commentaryPath)) {
+  try {
+    const commentaryContent = fs.readFileSync(commentaryPath, 'utf-8');
+    commentary = JSON.parse(commentaryContent);
+  } catch (e) {
+    console.warn(`Failed to load commentary for ${book.id} ${chapterNum}:`, e);
+  }
+}
+
 // Navigation links
 const prevLink = chapterNum > 1
   ? { href: `${base}${book.id}/${chapterNum - 1}/`, label: `Chapter ${chapterNum - 1}` }
@@ -120,32 +139,46 @@ const nextLink = chapterNum < totalChapters
 
   <Narration audioSrc={audioSrc} timingData={timingData} />
 
-  <div class:list={["verses", { "psalm-verses": isPsalm }]}>
-    {chapterData.verses.map((verse, index) => (
-      <>
-        {!isPsalm && index > 0 && index % 5 === 0 && <VerseDivider />}
-        {isPsalm ? (
-          <PsalmVerse
-            number={verse.number}
-            text={verse.text}
-            patched={verse.patched}
-            challoner={verse.challoner}
-            footnotes={verse.footnotes}
-            isFirst={index === 0}
-          />
-        ) : (
-          <Verse
-            number={verse.number}
-            text={verse.text}
-            patched={verse.patched}
-            challoner={verse.challoner}
-            footnotes={verse.footnotes}
-            isFirst={index === 0}
-          />
-        )}
-      </>
-    ))}
-  </div>
+  <FourfoldTabs uniqueId={`${book.id}-${chapterNum}`}>
+    <div slot="scripture" class:list={["verses", { "psalm-verses": isPsalm }]}>
+      {chapterData.verses.map((verse, index) => (
+        <>
+          {!isPsalm && index > 0 && index % 5 === 0 && <VerseDivider />}
+          {isPsalm ? (
+            <PsalmVerse
+              number={verse.number}
+              text={verse.text}
+              patched={verse.patched}
+              challoner={verse.challoner}
+              footnotes={verse.footnotes}
+              isFirst={index === 0}
+            />
+          ) : (
+            <Verse
+              number={verse.number}
+              text={verse.text}
+              patched={verse.patched}
+              challoner={verse.challoner}
+              footnotes={verse.footnotes}
+              isFirst={index === 0}
+            />
+          )}
+        </>
+      ))}
+    </div>
+    {commentary?.literal && (
+      <div slot="literal" class="commentary-content" set:html={commentary.literal} />
+    )}
+    {commentary?.allegorical && (
+      <div slot="allegorical" class="commentary-content" set:html={commentary.allegorical} />
+    )}
+    {commentary?.moral && (
+      <div slot="moral" class="commentary-content" set:html={commentary.moral} />
+    )}
+    {commentary?.anagogical && (
+      <div slot="anagogical" class="commentary-content" set:html={commentary.anagogical} />
+    )}
+  </FourfoldTabs>
 
   <ReadingProgress bookId={book.id} chapter={chapterNum} />
 
@@ -220,6 +253,51 @@ const nextLink = chapterNum < totalChapters
 
   .version-label {
     pointer-events: none;
+  }
+
+  /* Commentary content styling */
+  :global(.commentary-content) {
+    line-height: 1.8;
+    max-width: 65ch;
+    margin: 0 auto;
+  }
+
+  :global(.commentary-content h3) {
+    font-family: var(--font-heading);
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+  }
+
+  :global(.commentary-content h4) {
+    font-family: var(--font-heading);
+    font-size: 1.1rem;
+    margin: 1.5rem 0 0.5rem;
+    color: var(--color-accent);
+  }
+
+  :global(.commentary-content p) {
+    margin-bottom: 1rem;
+  }
+
+  :global(.commentary-content blockquote) {
+    border-left: 3px solid var(--color-accent);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    font-style: italic;
+    color: var(--color-muted);
+  }
+
+  :global(.commentary-content .source) {
+    font-size: 0.85rem;
+    color: var(--color-muted);
+    text-align: right;
+    margin-top: -0.5rem;
+  }
+
+  :global(.commentary-content .verse-ref) {
+    font-weight: 600;
+    color: var(--color-accent);
   }
 </style>
 

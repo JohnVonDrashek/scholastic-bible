@@ -129,6 +129,28 @@ const bookColor = bookId ? getBookColor(bookId) : '#8b4513';
         text-transform: uppercase;
       }
 
+      /* Mobile: stack header elements vertically */
+      @media (max-width: 600px) {
+        header nav {
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        header .site-title {
+          font-size: 1rem;
+        }
+
+        /* Breadcrumb takes full width on its own row */
+        :global(.breadcrumb) {
+          order: 10;
+          width: 100%;
+          justify-content: center;
+          padding-top: 0.5rem;
+          border-top: 1px solid var(--color-border);
+          margin-top: 0.25rem;
+        }
+      }
+
       /* Breadcrumb - use :global because content comes from slots */
       :global(.breadcrumb) {
         display: flex;

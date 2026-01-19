@@ -5,6 +5,7 @@ import VerseDivider from '../../components/VerseDivider.astro';
 import Navigation from '../../components/Navigation.astro';
 import Narration from '../../components/Narration.astro';
 import ReadingProgress from '../../components/ReadingProgress.astro';
+import FourfoldTabs from '../../components/FourfoldTabs.astro';
 import bible from '../../data/bible.json';
 
 export function getStaticPaths() {
@@ -46,21 +47,23 @@ const nextLink = chapterNum < totalChapters
 
   <Narration />
 
-  <div class="verses">
-    {chapter.verses.map((verse, index) => (
-      <>
-        {index > 0 && index % 5 === 0 && <VerseDivider />}
-        <Verse
-          number={verse.number}
-          text={verse.text}
-          patched={false}
-          challoner={[]}
-          footnotes={[]}
-          isFirst={index === 0}
-        />
-      </>
-    ))}
-  </div>
+  <FourfoldTabs uniqueId={`4-esdras-${chapterNum}`}>
+    <div slot="scripture" class="verses">
+      {chapter.verses.map((verse, index) => (
+        <>
+          {index > 0 && index % 5 === 0 && <VerseDivider />}
+          <Verse
+            number={verse.number}
+            text={verse.text}
+            patched={false}
+            challoner={[]}
+            footnotes={[]}
+            isFirst={index === 0}
+          />
+        </>
+      ))}
+    </div>
+  </FourfoldTabs>
 
   <ReadingProgress bookId="4-esdras" chapter={chapterNum} />
 
